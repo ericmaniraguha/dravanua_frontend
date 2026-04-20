@@ -62,7 +62,11 @@ const AttendanceLog = () => {
       const response = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: location.lat, lon: location.lon })
+        body: JSON.stringify({ 
+          gps_lat: location.lat, 
+          gps_lon: location.lon, 
+          gps_accuracy: location.accuracy 
+        })
       });
       const data = await response.json();
       if (data.success) {
@@ -114,7 +118,7 @@ const AttendanceLog = () => {
 
   const totalCalculatedHours = (filteredLogs || []).reduce((sum, log) => sum + (parseFloat(log.totalHours) || 0), 0).toFixed(1);
   const uniqueStaffCount = new Set((filteredLogs || []).map(l => l?.userName).filter(Boolean)).size;
-  const activeSessions = (filteredLogs || []).filter(log => log.clockIn && !log.clockOut).length;
+  const activeSessions = (filteredLogs || []).filter(log => log.status === 'on-duty').length;
 
   // Department breakdown
   const deptBreakdown = (filteredLogs || []).reduce((acc, log) => {
@@ -276,35 +280,35 @@ const AttendanceLog = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
           <button
             className="btn"
-            disabled={currentRecord?.clockIn || clockLoading || !location.lat}
+            disabled={(currentRecord && currentRecord.status === 'on-duty') || clockLoading || !location.lat}
             onClick={() => handleClockAction('in')}
             style={{
-              height: '56px', fontSize: '1rem', background: !location.lat ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
-              color: !location.lat ? 'rgba(255,255,255,0.5)' : '#1B5E20',
-              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || currentRecord?.clockIn ? 'not-allowed' : 'pointer',
+              height: '56px', fontSize: '1rem', background: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+              color: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.5)' : '#1B5E20',
+              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.2s'
             }}
-            onMouseOver={e => !location.lat || currentRecord?.clockIn ? null : e.target.style.background = 'white'}
-            onMouseOut={e => !location.lat || currentRecord?.clockIn ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
+            onMouseOver={e => !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? null : e.target.style.background = 'white'}
+            onMouseOut={e => !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
           >
-            <LogIn size={20} /> {!location.lat ? 'Waiting for GPS...' : currentRecord?.clockIn ? 'Already Clocked In' : 'Clock In'}
+            <LogIn size={20} /> {!location.lat ? 'Waiting for GPS...' : (currentRecord && currentRecord.status === 'on-duty') ? 'Checked In' : 'Clock In'}
           </button>
           <button
             className="btn"
-            disabled={!currentRecord?.clockIn || currentRecord?.clockOut || clockLoading || !location.lat}
+            disabled={(!currentRecord || currentRecord.status === 'off-duty') || clockLoading || !location.lat}
             onClick={() => handleClockAction('out')}
             style={{
-              height: '56px', fontSize: '1rem', background: !location.lat || !currentRecord?.clockIn || currentRecord?.clockOut ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
-              color: !location.lat || !currentRecord?.clockIn || currentRecord?.clockOut ? 'rgba(255,255,255,0.5)' : '#1B5E20',
-              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || !currentRecord?.clockIn || currentRecord?.clockOut ? 'not-allowed' : 'pointer',
+              height: '56px', fontSize: '1rem', background: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+              color: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.5)' : '#1B5E20',
+              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.2s'
             }}
-            onMouseOver={e => !location.lat || !currentRecord?.clockIn || currentRecord?.clockOut ? null : e.target.style.background = 'white'}
-            onMouseOut={e => !location.lat || !currentRecord?.clockIn || currentRecord?.clockOut ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
+            onMouseOver={e => !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? null : e.target.style.background = 'white'}
+            onMouseOut={e => !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
           >
-            <LogOut size={20} /> {!location.lat ? 'Waiting for GPS...' : !currentRecord?.clockIn ? 'Not Clocked In' : currentRecord?.clockOut ? 'Already Clocked Out' : 'Clock Out'}
+            <LogOut size={20} /> {!location.lat ? 'Waiting for GPS...' : (currentRecord?.status === 'on-duty') ? 'Clock Out' : 'Not Clocked In'}
           </button>
         </div>
       </div>

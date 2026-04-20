@@ -30,6 +30,7 @@ const AdminDashboard = () => {
   const [recentReports, setRecentReports] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
   const [recentMessages, setRecentMessages] = useState([]);
+  const [officeLocations, setOfficeLocations] = useState([]);
 
   // GPS Modal
   const [gpsModalOpen, setGpsModalOpen] = useState(false);
@@ -117,13 +118,22 @@ const AdminDashboard = () => {
     } catch (err) { console.error(err); }
   };
 
+  const fetchOfficeLocations = async () => {
+    try {
+      const resp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/office-locations`);
+      const data = await resp.json();
+      if (data?.success) setOfficeLocations(data.data);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       await Promise.all([
         fetchStats(), fetchRecentReports(), fetchRecentBookings(), fetchRecentMessages(),
         isSuper ? fetchUsers() : Promise.resolve(),
-        isSuper ? fetchOfficeLocation() : Promise.resolve()
+        isSuper ? fetchOfficeLocation() : Promise.resolve(),
+        isSuper ? fetchOfficeLocations() : Promise.resolve()
       ]);
       setLoading(false);
     };
@@ -564,6 +574,73 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* ── GPS Configuration Table ────────────────────────────────────── */}
+      {isSuper && (
+        <div style={{ marginTop: '2rem', padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
+          <div style={{ background: 'linear-gradient(135deg, #4A148C, #7B1FA2)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>GPS BOUNDARIES & ACCESS POLICIES</div>
+              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px' }}>CONFIGURED OFFICES · {officeLocations.length} RECORDS</div>
+            </div>
+            <button
+              onClick={() => setGpsModalOpen(true)}
+              style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', padding: '6px 14px', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+            >
+              <Settings size={12} /> CONFIGURE
+            </button>
+          </div>
+
+          {officeLocations.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
+              <MapPin size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <p>No office locations configured.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
+                <thead>
+                  <tr>
+                    {['OFFICE NAME', 'COORDINATES', 'RADIUS', 'STATUS', 'LAST UPDATED'].map(h => (
+                      <th key={h} style={{
+                        padding: '10px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
+                        textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left',
+                        background: 'linear-gradient(180deg, #7B1FA2, #4A148C)',
+                        borderRight: '1px solid rgba(255,255,255,0.1)'
+                      }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {officeLocations.map((loc, i) => (
+                    <tr key={loc.id || i} style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 0 ? 'white' : '#fafcfb' }} className="hover-row">
+                      <td style={{ padding: '10px 14px', fontWeight: 800, fontSize: '0.78rem', color: '#1e293b' }}>{loc.office_name}</td>
+                      <td style={{ padding: '10px 14px', fontSize: '0.72rem', color: '#64748b', fontFamily: 'monospace' }}>
+                        {parseFloat(loc.latitude).toFixed(4)}, {parseFloat(loc.longitude).toFixed(4)}
+                      </td>
+                      <td style={{ padding: '10px 14px', fontWeight: 700, color: '#4A148C' }}>{loc.allowed_radius}m</td>
+                      <td style={{ padding: '10px 14px' }}>
+                        <span style={{
+                          padding: '4px 10px', borderRadius: '50px', fontSize: '0.62rem', fontWeight: 900,
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          background: loc.is_active ? '#dcfce7' : '#fee2e2',
+                          color: loc.is_active ? '#166534' : '#991b1b'
+                        }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: loc.is_active ? '#16a34a' : '#dc2626' }} />
+                          {loc.is_active ? 'ACTIVE' : 'DISABLED'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px 14px', fontSize: '0.65rem', color: '#94a3b8' }}>
+                        {loc.updated_at ? new Date(loc.updated_at).toLocaleString() : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── GPS Modal ──────────────────────────────────────────────────── */}
       {gpsModalOpen && (

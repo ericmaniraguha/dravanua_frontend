@@ -10,9 +10,11 @@ const ManageModules = () => {
 
   const fetchModules = async () => {
     try {
-      const response = await secureFetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/modules');
+      const response = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/modules`);
       const data = await response.json();
-      if (data.success) setModules(data.data);
+      if (data.success) {
+        setModules(data.data || []);
+      }
     } catch (error) {
       console.error('Failed to fetch modules');
     } finally {
@@ -76,6 +78,14 @@ const ManageModules = () => {
     }, (err) => alert(`GPS Error: ${err.message}`), { enableHighAccuracy: true });
   };
 
+  if (loading) {
+    return (
+      <div className="admin-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}>
+        <RefreshCw className="spinning" size={40} color="#6366f1" />
+      </div>
+    );
+  }
+
   return (
     <div className="admin-page">
       <Header 
@@ -90,7 +100,7 @@ const ManageModules = () => {
           </div>
           <div className="admin-stat-info">
             <span className="admin-stat-label">Total Modules</span>
-            <span className="admin-stat-value">{modules.length} Units</span>
+            <span className="admin-stat-value">{(modules || []).length} Units</span>
           </div>
         </div>
         <div className="admin-stat-card">
@@ -106,7 +116,7 @@ const ManageModules = () => {
         gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
         gap: '2rem' 
       }}>
-        {modules.map((mod) => (
+        {(modules || []).map((mod) => (
           <div key={mod.id} className="admin-card module-card-premium" style={{ 
              padding: '2rem',
              position: 'relative',
@@ -115,7 +125,7 @@ const ManageModules = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>{mod.name}</h3>
-                <code style={{ fontSize: '0.75rem', color: '#888' }}>ID: {mod.slug.toUpperCase()}</code>
+                <code style={{ fontSize: '0.75rem', color: '#888' }}>ID: {mod.slug ? mod.slug.toUpperCase() : 'N/A'}</code>
               </div>
               <label className="admin-toggle">
                 <input 
@@ -157,13 +167,13 @@ const ManageModules = () => {
                 >
                   <Pin size={16} />
                 </button>
-                <button className="btn-icon" style={{ background: '#f5f5f5' }}>
+                <button className="btn-icon" style={{ background: '#f5f5f5' }} onClick={fetchModules}>
                   <RefreshCw size={16} color="#888" />
                 </button>
               </div>
             </div>
 
-            {mod.hub_lat && (
+            {mod.hub_lat && mod.hub_lon && (
               <div style={{ marginTop: '1rem', fontSize: '0.65rem', color: '#888', background: '#f9f9f9', padding: '8px', borderRadius: '8px', border: '1px solid #eee' }}>
                  📍 Hub Verified: <code>{mod.hub_lat.toString().slice(0,8)}, {mod.hub_lon.toString().slice(0,8)}</code>
               </div>

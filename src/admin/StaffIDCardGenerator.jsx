@@ -825,7 +825,8 @@ const IDCardStyles = () => (
 
     .card-preview-panel {
       flex: 1;
-      min-width: 500px;
+      min-width: 0;
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -1498,6 +1499,8 @@ const IDCardStyles = () => (
       to { transform: rotate(360deg); }
     }
 
+
+
     /* ===== RESPONSIVE ===== */
     @media screen and (max-width: 1100px) {
       .staff-selector-panel {
@@ -1509,6 +1512,34 @@ const IDCardStyles = () => (
       }
       .id-generator-container {
         flex-direction: column;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      .card-preview-stage {
+        padding: 1rem;
+        min-height: auto;
+      }
+      
+      .identity-card-element {
+        transform: scale(0.6);
+        transform-origin: center center;
+        margin: -40px 0;
+      }
+
+      .staff-selector-panel {
+        width: 100%;
+      }
+      
+      .design-buttons-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media screen and (max-width: 400px) {
+      .identity-card-element {
+        transform: scale(0.5);
+        margin: -60px 0;
       }
     }
 

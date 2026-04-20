@@ -2083,8 +2083,9 @@ select.form-input {
 .admin-main {
   flex: 1;
   margin-left: 260px;
-  padding: 0;
+  padding: 2.5rem;
   min-height: 100vh;
+  transition: margin-left 0.3s ease, padding 0.3s ease;
 }
 
 /* ===== ADMIN SIDEBAR ===== */
@@ -3027,6 +3028,14 @@ select.form-input {
   z-index: 999;
 }
 
+@media (max-width: 1024px) {
+  .admin-main {
+    margin-left: 0 !important;
+    padding: 1.5rem !important;
+    width: 100% !important;
+  }
+}
+
 @media (max-width: 992px) {
   .admin-mobile-header { display: flex; }
 }
@@ -3700,17 +3709,19 @@ select.form-input {
 }
 
 @media (max-width: 768px) {
+  /* Force top header action ribbons to wrap efficiently */
+  .admin-page div[style*="justify-content: space-between"] {
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+  }
+
   /* Ultra-flatten all parallel columns to native scrolling blocks */
   .admin-page div[style*="1fr 1fr"],
   .admin-page div[style*="repeat(4"],
   .admin-page div[style*="repeat(3"],
+  .admin-page div[style*="repeat(2"],
   .admin-modal div[style*="1fr 1fr"] {
     grid-template-columns: 1fr !important;
-  }
-
-  /* Force top header action ribbons to wrap efficiently */
-  .admin-page div[style*="justify-content: space-between"] {
-    flex-wrap: wrap !important;
   }
 
   /* Stabilize floating Action modulators */
