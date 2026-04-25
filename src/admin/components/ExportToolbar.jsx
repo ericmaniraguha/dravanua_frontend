@@ -105,7 +105,7 @@ const ExportToolbar = ({
                       textAlign: 'left',
                     }}
                   >
-                    <span style={{ width: '32px', fontSize: '0.7rem', fontWeight: 900, color: '#1B5E20' }}>{c.symbol}</span>
+                    <span style={{ width: '32px', fontSize: '0.7rem', fontWeight: 900, color: '#32FC05' }}>{c.symbol}</span>
                     {c.label}
                     {c.code === currency && <CheckCircle size={12} color="#16a34a" style={{ marginLeft: 'auto' }} />}
                   </button>
@@ -117,7 +117,7 @@ const ExportToolbar = ({
 
         {/* PDF Button */}
         {onPDF && (
-          <button onClick={onPDF} style={btnStyle('#1B5E20', 'white', '#166534')} title="Generate PDF Report">
+          <button onClick={onPDF} style={btnStyle('#32FC05', 'white', '#166534')} title="Generate PDF Report">
             <Printer size={14} />
             <span style={{ fontSize: '0.72rem', fontWeight: 800 }}>PDF</span>
           </button>

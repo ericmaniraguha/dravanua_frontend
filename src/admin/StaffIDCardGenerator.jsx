@@ -38,7 +38,7 @@ const StaffIDCardGenerator = () => {
   // Design Templates
   const cardStyles = {
     professional: {
-      background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+      background: 'linear-gradient(135deg, #32FC05, #2E7D32)',
       color: 'white',
       accent: '#32CD32'
     },
@@ -50,7 +50,7 @@ const StaffIDCardGenerator = () => {
     minimal: {
       background: '#ffffff',
       color: '#1e293b',
-      accent: '#1B5E20',
+      accent: '#32FC05',
       border: '1px solid #e2e8f0'
     }
   };
@@ -417,12 +417,12 @@ const ImageZoomModal = ({ imageUrl, onClose }) => (
 const StaffSelectorPanel = ({ users, selectedUser, searchTerm, onSearchChange, onSelectUser }) => (
   <div className="admin-card staff-search-card">
     <div className="panel-header">
-      <Users size={20} color="#1B5E20" />
+      <Users size={20} color="#32FC05" />
       <h3 className="panel-title">STAFF REPOSITORY</h3>
     </div>
     
     <div className="staff-search-inp">
-      <Search size={16} color="#1B5E20" />
+      <Search size={16} color="#32FC05" />
       <input 
         type="text" 
         placeholder="Search staff members..." 
@@ -475,7 +475,7 @@ const StaffSelectorPanel = ({ users, selectedUser, searchTerm, onSearchChange, o
 const DesignSelectorPanel = ({ design, onSelectDesign }) => (
   <div className="admin-card">
     <div className="panel-header">
-      <Palette size={40} color="#1B5E20" />
+      <Palette size={40} color="#32FC05" />
       <h3 className="panel-title">Aesthetic Templates</h3>
     </div>
     <div className="design-buttons-grid">
@@ -635,7 +635,7 @@ const PersonalizationPanel = ({
 }) => (
   <div className="admin-card">
     <div className="panel-header">
-      <Camera size={20} color="#1B5E20" />
+      <Camera size={20} color="#32FC05" />
       <h3 className="panel-title">CREDENTIAL PERSONALIZATION</h3>
     </div>
     
@@ -648,7 +648,7 @@ const PersonalizationPanel = ({
           className="image-mode-btn"
           title="Official Photo"
           style={{ 
-            background: imageMode === 'official' ? '#1B5E20' : '#f8fafc', 
+            background: imageMode === 'official' ? '#32FC05' : '#f8fafc', 
             color: imageMode === 'official' ? 'white' : '#64748b', 
             opacity: !selectedUser?.profilePicture ? 0.5 : 1, 
             display: 'flex', justifyContent: 'center', alignItems: 'center', 
@@ -662,7 +662,7 @@ const PersonalizationPanel = ({
           className="image-mode-btn"
           title="Upload New"
           style={{ 
-            background: imageMode === 'upload' ? '#1B5E20' : '#f8fafc', 
+            background: imageMode === 'upload' ? '#32FC05' : '#f8fafc', 
             color: imageMode === 'upload' ? 'white' : '#64748b', 
             display: 'flex', justifyContent: 'center', alignItems: 'center', 
             padding: '12px'
@@ -675,7 +675,7 @@ const PersonalizationPanel = ({
           className="image-mode-btn"
           title="Custom Link"
           style={{ 
-            background: imageMode === 'url' ? '#1B5E20' : '#f8fafc', 
+            background: imageMode === 'url' ? '#32FC05' : '#f8fafc', 
             color: imageMode === 'url' ? 'white' : '#64748b', 
             display: 'flex', justifyContent: 'center', alignItems: 'center', 
             padding: '12px'
@@ -916,7 +916,7 @@ const IDCardStyles = () => (
       width: 28px;
       height: 28px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #1B5E20, #32CD32);
+      background: linear-gradient(135deg, #32FC05, #32CD32);
       color: white;
       display: flex;
       align-items: center;
@@ -933,7 +933,7 @@ const IDCardStyles = () => (
     .staff-id-badge {
       font-size: 0.65rem;
       font-weight: 800;
-      color: #1B5E20;
+      color: #32FC05;
       background: #f0faf0;
       padding: 2px 8px;
       border-radius: 4px;
@@ -969,9 +969,9 @@ const IDCardStyles = () => (
     }
 
     .design-option-btn.active {
-      border-color: #1B5E20;
+      border-color: #32FC05;
       background: #f0faf0;
-      color: #1B5E20;
+      color: #32FC05;
       border-width: 2px;
     }
 
@@ -1288,7 +1288,7 @@ const IDCardStyles = () => (
       border: 2px dashed #cbd5e1;
       background: #fcfdfc;
       cursor: pointer;
-      color: #1B5E20;
+      color: #32FC05;
       fontSize: 0.8rem;
       fontWeight: 900;
       transition: all 0.2s;
@@ -1364,7 +1364,7 @@ const IDCardStyles = () => (
 
     .apply-profile-btn {
       width: 100%;
-      background: #1B5E20;
+      background: #32FC05;
       color: white;
       border: none;
       border-radius: 10px;

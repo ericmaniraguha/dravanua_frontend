@@ -43,7 +43,7 @@ const CustomerLogin = () => {
         
         {/* Left Side: Client Branding */}
         <div className="admin-login-info" style={{ flex: 1, background: 'linear-gradient(rgba(13, 59, 13, 0.8), rgba(27, 94, 32, 0.9)), url("/logo-dvs.jpg")', backgroundSize: 'cover', backgroundPosition: 'center', padding: '1.75rem', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '300px' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#90EE90', fontWeight: 800 }}>Client Portal</h2>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#32FC05', fontWeight: 800 }}>Client Portal</h2>
           <p style={{ fontSize: '0.85rem', marginBottom: '1.5rem', color: '#fff', opacity: 0.9 }}>
              Experience the art of creation. Manage your bookings and creative projects at <strong>DRAVANUA STUDIO</strong>.
           </p>
@@ -106,7 +106,7 @@ const CustomerLogin = () => {
           </form>
 
           <div className="admin-login-footer" style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.75rem' }}>Not a member? <Link to="/client/signup" style={{ color: '#1B5E20', fontWeight: 700 }}>Join Dr Studio</Link></p>
+            <p style={{ fontSize: '0.75rem' }}>Not a member? <Link to="/client/signup" style={{ color: '#32FC05', fontWeight: 700 }}>Join Dr Studio</Link></p>
           </div>
         </div>
       </div>

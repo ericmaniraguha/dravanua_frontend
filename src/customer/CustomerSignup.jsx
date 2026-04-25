@@ -37,7 +37,7 @@ const CustomerSignup = () => {
       <div className="admin-login-container" style={{ display: 'flex', background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 15px 40px rgba(0,0,0,0.1)', maxWidth: '800px', width: '100%', maxHeight: '520px' }}>
         
         <div className="admin-login-info" style={{ flex: 1, background: 'linear-gradient(rgba(13, 59, 13, 0.8), rgba(27, 94, 32, 0.9)), url("/logo-dvs.jpg")', backgroundSize: 'cover', backgroundPosition: 'center', padding: '1.75rem', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: '300px' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#90EE90', fontWeight: 800 }}>Join the HUB</h2>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#32FC05', fontWeight: 800 }}>Join the HUB</h2>
           <p style={{ fontSize: '0.85rem', marginBottom: '1.5rem', color: '#fff', opacity: 0.9 }}>
              Create your account to start your creative journey with DRAVANUA.
           </p>
@@ -89,7 +89,7 @@ const CustomerSignup = () => {
           </form>
 
           <div className="admin-login-footer" style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-             <Link to="/client/login" style={{ fontSize: '0.8rem', color: '#1B5E20', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', textDecoration: 'none', fontWeight: 700 }}>
+             <Link to="/client/login" style={{ fontSize: '0.8rem', color: '#32FC05', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', textDecoration: 'none', fontWeight: 700 }}>
                 <ArrowLeft size={14} /> Back to Login
              </Link>
           </div>

@@ -9,6 +9,7 @@ import About from './pages/About';
 import Services from './pages/Services';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
+import Partners from './pages/Partners';
 
 // Admin imports
 import Login from './admin/Login';
@@ -34,6 +35,9 @@ import ManageReminders from './admin/ManageReminders';
 import StaffIDCardGenerator from './admin/StaffIDCardGenerator';
 import PayrollManagement from './admin/PayrollManagement';
 import OrganizationalFinance from './admin/OrganizationalFinance';
+import ManageItems from './admin/ManageItems';
+import ManagePartners from './admin/ManagePartners';
+
 
 // Customer imports
 import CustomerLogin from './customer/CustomerLogin';
@@ -61,6 +65,7 @@ function AppContent() {
                 <Route path="/services" element={<Services />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/partners" element={<Partners />} />
 
                 {/* Auth Public Routes within Public Layout */}
                 <Route path="/admin/signup" element={<Signup />} />
@@ -111,6 +116,9 @@ function AppContent() {
           <Route path="id-cards" element={<StaffIDCardGenerator />} />
           <Route path="payroll" element={<PayrollManagement />} />
           <Route path="org-finance" element={<OrganizationalFinance />} />
+          <Route path="items" element={<ManageItems />} />
+          <Route path="partners-admin" element={<ManagePartners />} />
+
         </Route>
 
         {/* Customer Portal Routes */}

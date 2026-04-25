@@ -72,12 +72,18 @@ const ManageSubscriptions = () => {
   const [message, setMessage] = useState(null);
   const [showAlerts, setShowAlerts] = useState(false);
   const [sendingAlert, setSendingAlert] = useState(null);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1); // Default to last 1 year for subscriptions
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   // ─── Fetch Data ─────────────────────────────────────────────────
   const fetchSubscriptions = async () => {
     try {
       setLoading(true);
-      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/subscriptions`);
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/subscriptions?start=${startDate}&end=${endDate}`);
       const data = await res.json();
       if (data.success) setSubscriptions(data.data || []);
     } catch (err) {
@@ -97,7 +103,7 @@ const ManageSubscriptions = () => {
     }
   };
 
-  useEffect(() => { fetchSubscriptions(); fetchAlerts(); }, []);
+  useEffect(() => { fetchSubscriptions(); fetchAlerts(); }, [startDate, endDate]);
 
   // ─── Filter Logic ───────────────────────────────────────────────
   useEffect(() => {
@@ -266,12 +272,12 @@ const ManageSubscriptions = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
 
         <div style={{ background: 'white', borderRadius: '18px', padding: '1.25rem 1.5rem', border: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#e8f5e9', color: '#1B5E20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#e8f5e9', color: '#32FC05', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <CreditCard size={24} />
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Active Subscriptions</div>
-            <div style={{ fontSize: '1.55rem', fontWeight: 900, color: '#1B5E20', lineHeight: 1 }}>{activeCount}</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: 900, color: '#32FC05', lineHeight: 1 }}>{activeCount}</div>
             <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 600, marginTop: '4px' }}>of {subscriptions.length} total</div>
           </div>
         </div>
@@ -293,7 +299,7 @@ const ManageSubscriptions = () => {
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Upcoming Renewals</div>
-            <div style={{ fontSize: '1.55rem', fontWeight: 900, color: upcomingCount > 0 ? '#b45309' : '#1B5E20', lineHeight: 1 }}>{upcomingCount}</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: 900, color: upcomingCount > 0 ? '#b45309' : '#32FC05', lineHeight: 1 }}>{upcomingCount}</div>
             <div style={{ fontSize: '0.7rem', color: '#aaa', fontWeight: 600, marginTop: '4px' }}>within next 7 days</div>
           </div>
         </div>
@@ -354,7 +360,7 @@ const ManageSubscriptions = () => {
                       style={{
                         display: 'flex', alignItems: 'center', gap: '6px',
                         padding: '8px 14px', borderRadius: '10px', border: 'none',
-                        background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+                        background: 'linear-gradient(135deg, #32FC05, #2E7D32)',
                         color: 'white', fontWeight: 800, fontSize: '0.7rem', cursor: 'pointer',
                         opacity: sendingAlert === a.id ? 0.6 : 1
                       }}
@@ -372,6 +378,22 @@ const ManageSubscriptions = () => {
       {/* Toolbar */}
       <div className="admin-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', padding: '4px 8px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <Calendar size={14} className="text-muted" />
+            <input 
+              type="date" 
+              value={startDate} 
+              onChange={e => setStartDate(e.target.value)} 
+              style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+            />
+            <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+            <input 
+              type="date" 
+              value={endDate} 
+              onChange={e => setEndDate(e.target.value)} 
+              style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+            />
+          </div>
           <div style={{ position: 'relative' }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
             <input
@@ -385,7 +407,7 @@ const ManageSubscriptions = () => {
               <button key={s} onClick={() => setStatusFilter(s)} style={{
                 padding: '8px 14px', borderRadius: '10px', border: 'none', fontSize: '0.72rem',
                 fontWeight: statusFilter === s ? 900 : 600, cursor: 'pointer',
-                background: statusFilter === s ? '#1B5E20' : '#f1f5f9',
+                background: statusFilter === s ? '#32FC05' : '#f1f5f9',
                 color: statusFilter === s ? 'white' : '#475569'
               }}>{s}</button>
             ))}
@@ -402,7 +424,7 @@ const ManageSubscriptions = () => {
             style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px',
               borderRadius: '12px', border: 'none', fontSize: '0.8rem', fontWeight: 900,
-              background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', cursor: 'pointer'
+              background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', cursor: 'pointer'
             }}>
             <Plus size={16} /> New Subscription
           </button>
@@ -413,7 +435,7 @@ const ManageSubscriptions = () => {
       <div className="admin-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
 
         {/* Branded Report Header */}
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — SUBSCRIPTION LEDGER {new Date().getFullYear()}
@@ -424,14 +446,14 @@ const ManageSubscriptions = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1100px' }}>
             <thead>
-              <tr style={{ background: '#1B5E20' }}>
+              <tr style={{ background: '#32FC05' }}>
                 {[
                   { label: 'SIN',           tip: 'Subscription ID' },
                   { label: 'DATE',          tip: 'Start Date' },
@@ -454,7 +476,7 @@ const ManageSubscriptions = () => {
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: 'left', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h.label}</th>
                 ))}
               </tr>
@@ -484,7 +506,7 @@ const ManageSubscriptions = () => {
                     onMouseLeave={e => e.currentTarget.style.background = rowBg}
                   >
                     {/* SIN */}
-                    <td style={{ ...tdStyle, fontFamily: 'monospace', fontWeight: 900, fontSize: '0.68rem', color: '#1B5E20', whiteSpace: 'nowrap' }}>
+                    <td style={{ ...tdStyle, fontFamily: 'monospace', fontWeight: 900, fontSize: '0.68rem', color: '#32FC05', whiteSpace: 'nowrap' }}>
                       {sinCode}
                     </td>
 
@@ -515,7 +537,7 @@ const ManageSubscriptions = () => {
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 800, color: '#334155' }}>1</td>
 
                     {/* PRICE */}
-                    <td style={{ ...tdStyle, fontWeight: 800, color: '#1B5E20', whiteSpace: 'nowrap' }}>
+                    <td style={{ ...tdStyle, fontWeight: 800, color: '#32FC05', whiteSpace: 'nowrap' }}>
                       {Number(sub.cost).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                     </td>
 
@@ -614,8 +636,8 @@ const ManageSubscriptions = () => {
             {/* Report Footer Totals */}
             {filtered.length > 0 && (
               <tfoot>
-                <tr style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderTop: '2px solid #1B5E20' }}>
-                  <td colSpan={5} style={{ padding: '10px 12px', fontWeight: 900, fontSize: '0.72rem', color: '#1B5E20', textAlign: 'right' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderTop: '2px solid #32FC05' }}>
+                  <td colSpan={5} style={{ padding: '10px 12px', fontWeight: 900, fontSize: '0.72rem', color: '#32FC05', textAlign: 'right' }}>
                     TOTAL ({filtered.filter(s => s.status === 'Active').length} Active):
                   </td>
                   <td style={{ padding: '10px 12px', fontWeight: 900, fontSize: '0.78rem', color: '#0D3B0D' }}>
@@ -639,7 +661,7 @@ const ManageSubscriptions = () => {
       {isModalOpen && (
         <div className="admin-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false); }}>
           <div className="admin-modal" style={{ maxWidth: '620px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: 'white', fontWeight: 900, fontSize: '1rem' }}>
                   {editingItem ? 'Edit Subscription' : 'Register New Subscription'}

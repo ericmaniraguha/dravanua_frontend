@@ -129,7 +129,7 @@ const ContractGenerator = ({ onCancel, onSave, repository = 'client_files', init
           `).join('')}
           <tr style="background:#e8f5e9">
             <td style="text-align:right; font-weight:900;">Subtotal:</td>
-            <td style="text-align:right; font-weight:900; color:#1B5E20">${totals.subtotal.toLocaleString()}</td>
+            <td style="text-align:right; font-weight:900; color:#32FC05">${totals.subtotal.toLocaleString()}</td>
           </tr>
           <tr>
             <td style="text-align:right; font-weight:700;">Deposit Paid:</td>
@@ -143,7 +143,7 @@ const ContractGenerator = ({ onCancel, onSave, repository = 'client_files', init
       </table>
       
       <div class="section-title">Terms & Conditions</div>
-      <div style="font-size: 11px; color:#555; line-height: 1.6; background: #f8fdf8; padding: 15px; border-left: 3px solid #1B5E20; margin-bottom: 20px;">
+      <div style="font-size: 11px; color:#555; line-height: 1.6; background: #f8fdf8; padding: 15px; border-left: 3px solid #32FC05; margin-bottom: 20px;">
         <p style="margin-bottom: 8px;">${contractData.terms}</p>
         <p>1. A non-refundable retainer/deposit of <strong>${contractData.deposit.toLocaleString()} ${contractData.currency}</strong> is required to formally secure the date and services.</p>
         <p>2. Final high-resolution media will be securely archived in the studio's cloud vault for 12 calendar months post-delivery.</p>
@@ -392,7 +392,7 @@ const ContractGenerator = ({ onCancel, onSave, repository = 'client_files', init
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <button 
                     onClick={handlePrintContract}
-                    style={{ background: '#1B5E20', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(27, 94, 32, 0.2)' }}
+                    style={{ background: '#32FC05', color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '1rem', boxShadow: '0 4px 12px rgba(27, 94, 32, 0.2)' }}
                   >
                     <Printer size={18} /> Review & Print Official Document
                   </button>
@@ -458,7 +458,7 @@ const ContractGenerator = ({ onCancel, onSave, repository = 'client_files', init
                 Next: Service Scope <ChevronRight size={18} />
               </button>
             ) : step === 2 ? (
-              <button className="btn-generate" onClick={handleGenerate} disabled={isGenerating} style={{ background: '#1B5E20' }}>
+              <button className="btn-generate" onClick={handleGenerate} disabled={isGenerating} style={{ background: '#32FC05' }}>
                 {isGenerating ? <><RefreshCw size={18} className="spin" /> Structuring Document...</> : <><Shield size={18} /> Prepare Legal Document</>}
               </button>
             ) : (

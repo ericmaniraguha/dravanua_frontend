@@ -1,34 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
 
-/* ===== CSS VARIABLES — GREEN THEME ===== */
+/* ===== CSS VARIABLES — PREMIUM LIGHTGREEN THEME ===== */
 :root {
-  --primary: #32CD32;
-  --primary-dark: #1B5E20;
-  --primary-deeper: #0D3B0D;
-  --primary-light: rgba(50, 205, 50, 0.12);
-  --primary-glow: rgba(50, 205, 50, 0.25);
-  --secondary: #2E7D32;
-  --secondary-dark: #1B5E20;
-  --accent: #1a1a2e;
-  --accent-green: #0D3B0D;
-  --background: #f0faf0;
+  --primary: #22C55E;       /* Vibrant Green-500 */
+  --primary-light: #86EFAC; /* Soft Green-300 */
+  --primary-dark: #15803D;  /* Deep Green-700 */
+  --primary-deeper: #064E3B; /* Emerald-900 */
+  --primary-soft: rgba(34, 197, 94, 0.12);
+  --primary-glow: rgba(34, 197, 94, 0.25);
+  --secondary: #10B981;     /* Emerald-500 */
+  --secondary-dark: #065F46;
+  --accent: #0f172a;        /* Slate-900 */
+  --accent-green: #064e3b;
+  --background: #f9fafb;    /* Very light gray/green mix */
   --surface: #ffffff;
   --text: #1e293b;
-  --text-light: #555;
+  --text-light: #64748b;
   --text-dark: #0f172a;
   --cream: #fefff8;
-  --gray-50: #f8faf8;
-  --gray-100: #f1f5f1;
-  --gray-200: #e2e8e2;
-  --gray-400: #94a398;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
   --gray-500: #64748b;
-  --border: #d4e8d4;
+  --border: #e2e8f0;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 4px 6px -1px rgb(27 94 32 / 0.08), 0 2px 4px -2px rgb(27 94 32 / 0.06);
-  --shadow-lg: 0 10px 15px -3px rgb(27 94 32 / 0.1), 0 4px 6px -4px rgb(27 94 32 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(27 94 32 / 0.1), 0 8px 10px -6px rgb(27 94 32 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(27 94 32 / 0.2);
-  --shadow-green: 0 8px 30px rgba(50, 205, 50, 0.2);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(21, 128, 61, 0.1), 0 4px 6px -4px rgba(21, 128, 61, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(21, 128, 61, 0.1), 0 8px 10px -6px rgba(21, 128, 61, 0.05);
+  --shadow-green: 0 8px 30px rgba(34, 197, 94, 0.2);
   --radius: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -418,7 +418,7 @@ img { max-width: 100%; display: block; }
 
 .hero-title .brand-name {
   display: block;
-  background: linear-gradient(135deg, #32CD32, #90EE90);
+  background: linear-gradient(135deg, #32CD32, #32FC05);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -713,7 +713,7 @@ img { max-width: 100%; display: block; }
 .about-preview-image {
   border-radius: var(--radius-2xl);
   overflow: hidden;
-  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  background: linear-gradient(135deg, #32FC05, #2E7D32);
   padding: 3rem;
   display: flex;
   align-items: center;
@@ -2185,7 +2185,7 @@ select.form-input {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+  background: linear-gradient(135deg, #32FC05 0%, #2E7D32 100%);
   border-bottom: none;
   position: sticky;
   top: 0;
@@ -2234,7 +2234,7 @@ select.form-input {
   width: 240px;
   height: 38px;
   font-family: inherit;
-  color: #1B5E20;
+  color: #32FC05;
 }
 
 .admin-search-input:focus {
@@ -2292,7 +2292,7 @@ select.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1B5E20;
+  color: #32FC05;
 }
 
 .admin-profile-info {
@@ -3410,7 +3410,7 @@ select.form-input {
 
 .modal-overlay form .btn-primary,
 .modal-overlay form button[type="submit"] {
-  background: linear-gradient(135deg, #1B5E20, #43A047);
+  background: linear-gradient(135deg, #32FC05, #43A047);
   color: white;
   border: none;
   box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
@@ -3442,7 +3442,7 @@ select.form-input {
 
 .efficiency-badge {
   background: #e8f5e9;
-  color: #1b5e20;
+  color: #32FC05;
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 800;
@@ -3876,4 +3876,9 @@ select.form-input {
     bottom: 1.25rem;
     left: 1.25rem;
   }
+}
+/* ===== LOGO MARQUEE ANIMATION ===== */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }

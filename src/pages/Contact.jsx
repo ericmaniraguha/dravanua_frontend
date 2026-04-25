@@ -13,6 +13,25 @@ const Contact = () => {
   });
   const [submitted, setSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [officeLocation, setOfficeLocation] = useState({
+    latitude: -1.9667,
+    longitude: 29.9854,
+    address: 'Kigali, Rwanda 🇷🇼',
+    office_name: 'DRAVANUA HUB'
+  });
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/public/office-location`);
+        const data = await resp.json();
+        if (data.success) setOfficeLocation(data.data);
+      } catch (err) {
+        console.error('Failed to fetch location:', err);
+      }
+    };
+    fetchLocation();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,9 +100,9 @@ const Contact = () => {
                   </div>
                   <div>
                     <div className="contact-info-label">Our Location</div>
-                    <div className="contact-info-value">Kigali, Rwanda 🇷🇼</div>
+                    <div className="contact-info-value">{officeLocation.address || officeLocation.office_name || 'Kigali, Rwanda 🇷🇼'}</div>
                     <a 
-                      href="https://maps.app.goo.gl/GkErn7UAFp2yLxMg9" 
+                      href={`https://www.google.com/maps?q=${officeLocation.latitude},${officeLocation.longitude}`}
                       target="_blank" 
                       rel="noreferrer" 
                       className="contact-map-link"

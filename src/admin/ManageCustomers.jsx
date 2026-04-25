@@ -5,7 +5,7 @@ import {
   Trash2, Edit, X, TrendingUp, DollarSign, Target, 
   BarChart3, PieChart, Activity, UserCheck, RefreshCw,
   AlertCircle, ChevronLeft, ChevronRight, Check, AlertTriangle, 
-  Printer, Shield, FileText, MessageCircle, Download, Eye
+  Printer, Shield, FileText, MessageCircle, Download, Eye, Calendar
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Header from './components/Header';
@@ -38,6 +38,13 @@ const ManageCustomers = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   
   // Customer details modal
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -70,7 +77,8 @@ const ManageCustomers = () => {
     setError(null);
     setLoading(true);
     try {
-      const response = await secureFetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/customers');
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/customers?start=${startDate}&end=${endDate}`;
+      const response = await secureFetch(url);
       
       const data = await response.json();
       if (data.success) {
@@ -90,7 +98,7 @@ const ManageCustomers = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, [fetchCustomers]);
+  }, [fetchCustomers, startDate, endDate]);
 
   useEffect(() => {
     if (isModalOpen && firstInputRef.current) {
@@ -240,22 +248,22 @@ const ManageCustomers = () => {
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #1B5E20; padding-bottom: 20px; }
-          .logo { font-size: 28px; font-weight: 900; color: #1B5E20; margin-bottom: 5px; }
+          .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #32FC05; padding-bottom: 20px; }
+          .logo { font-size: 28px; font-weight: 900; color: #32FC05; margin-bottom: 5px; }
           .tagline { font-size: 14px; color: #64748b; font-style: italic; }
-          .customer-id { font-size: 24px; font-weight: 800; color: #1B5E20; margin: 20px 0; }
+          .customer-id { font-size: 24px; font-weight: 800; color: #32FC05; margin: 20px 0; }
           .section { margin: 30px 0; padding: 20px; background: #f8fafc; border-radius: 12px; }
-          .section-title { font-size: 16px; font-weight: 800; color: #1B5E20; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .section-title { font-size: 16px; font-weight: 800; color: #32FC05; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
           .info-item { padding: 10px 0; }
           .info-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
           .info-value { font-size: 14px; font-weight: 600; color: #1e293b; }
-          .stats-summary { background: linear-gradient(135deg, #1B5E20, #2E7D32); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; }
+          .stats-summary { background: linear-gradient(135deg, #32FC05, #2E7D32); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; }
           .stats-item { display: inline-block; margin: 0 20px; }
           .stats-value { font-size: 32px; font-weight: 900; display: block; }
           .stats-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; }
           .services-section { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 8px; }
-          .service-tag { display: inline-block; background: #1B5E20; color: white; padding: 6px 12px; border-radius: 6px; margin: 4px; font-size: 12px; font-weight: 700; }
+          .service-tag { display: inline-block; background: #32FC05; color: white; padding: 6px 12px; border-radius: 6px; margin: 4px; font-size: 12px; font-weight: 700; }
           .footer { margin-top: 50px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b; }
           @media print { body { padding: 20px; } .no-print { display: none; } }
         </style>
@@ -331,8 +339,8 @@ const ManageCustomers = () => {
         </div>
 
         <div class="no-print" style="text-align: center; margin-top: 30px;">
-          <button onclick="window.print()" style="background: #1B5E20; color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; margin-right: 10px;">PRINT REPORT</button>
-          <button onclick="window.close()" style="background: white; color: #1B5E20; border: 2px solid #1B5E20; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer;">CLOSE</button>
+          <button onclick="window.print()" style="background: #32FC05; color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; margin-right: 10px;">PRINT REPORT</button>
+          <button onclick="window.close()" style="background: white; color: #32FC05; border: 2px solid #32FC05; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer;">CLOSE</button>
         </div>
       </body>
       </html>
@@ -360,7 +368,31 @@ const ManageCustomers = () => {
     (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
     (c.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.phone || '').includes(searchTerm)
-  );
+  ).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let aVal = a[sortConfig.key];
+    let bVal = b[sortConfig.key];
+
+    if (sortConfig.key === 'totalSpent') {
+      aVal = parseFloat(aVal) || 0;
+      bVal = parseFloat(bVal) || 0;
+    } else {
+      aVal = String(aVal || '').toLowerCase();
+      bVal = String(bVal || '').toLowerCase();
+    }
+
+    if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
   const paginatedCustomers = filteredCustomers.slice(
@@ -427,7 +459,7 @@ const ManageCustomers = () => {
               <td style="font-size:10px;color:#666">${c.email || '—'}</td>
               <td style="font-size:10px;color:#666">${c.phone || '—'}</td>
               <td><span class="badge badge-blue">${c.channel || 'Unknown'}</span></td>
-              <td style="text-align:right; font-weight:900; color:#1B5E20">RWF ${Number(c.totalSpent || 0).toLocaleString()}</td>
+              <td style="text-align:right; font-weight:900; color:#32FC05">RWF ${Number(c.totalSpent || 0).toLocaleString()}</td>
             </tr>`).join('')}
         </tbody>
       </table>`;
@@ -489,7 +521,7 @@ const ManageCustomers = () => {
       {/* ── Summary Stats ─────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
         {[
-          { label: isSuper ? 'Total Database' : 'Department Clients', val: roleFilteredCustomers.length, icon: Users, color: '#1B5E20', bg: '#f0fdf4' },
+          { label: isSuper ? 'Total Database' : 'Department Clients', val: roleFilteredCustomers.length, icon: Users, color: '#32FC05', bg: '#f0fdf4' },
           { label: 'Avg. LTV', val: `RWF ${avgLTV}`, icon: DollarSign, color: '#0369a1', bg: '#f0f9ff' },
           { label: 'High-Value Rate', val: `${highValuePct}%`, icon: TrendingUp, color: '#15803d', bg: '#f0fdf4' },
           { label: 'Top Channel', val: topChannel, icon: Target, color: '#92400e', bg: '#fffbeb' }
@@ -534,6 +566,12 @@ const ManageCustomers = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '4px 10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+            <Calendar size={14} className="text-muted" />
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} />
+            <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} />
+          </div>
           <ExportToolbar 
             onPDF={handlePrint}
             onExcel={() => exportToExcel([{
@@ -555,14 +593,14 @@ const ManageCustomers = () => {
 
           <button 
             onClick={fetchCustomers}
-            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1B5E20' }}
+            style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#32FC05' }}
           >
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
 
           <button 
             onClick={openCreateModal}
-            style={{ height: '42px', padding: '0 20px', background: '#1B5E20', color: 'white', border: 'none', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+            style={{ height: '42px', padding: '0 20px', background: '#32FC05', color: 'white', border: 'none', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
           >
             <UserPlus size={18} /> ADD MEMBER
           </button>
@@ -571,13 +609,13 @@ const ManageCustomers = () => {
 
       {/* Main Table */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>CUSTOMER MASTER LEDGER</div>
             <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px' }}>REGISTRY AUDIT · {filteredCustomers.length} RECORDS</div>
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
-            <div style={{ color: '#90EE90' }}>CONFIDENTIAL CRM</div>
+            <div style={{ color: '#32FC05' }}>CONFIDENTIAL CRM</div>
           </div>
         </div>
 
@@ -585,14 +623,34 @@ const ManageCustomers = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1000px' }}>
             <thead>
               <tr>
-                {['CUSTOMER IDENTITY', 'CONTACT CONNECT', 'SERVICES/INTERESTS', 'CHANNEL', 'LIFETIME VALUE', 'ACTIONS'].map((h, i) => (
-                  <th key={h} style={{
-                    padding: '12px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
-                    textTransform: 'uppercase', letterSpacing: '0.06em',
-                    textAlign: (h === 'LIFETIME VALUE') ? 'right' : (h === 'ACTIONS' ? 'center' : 'left'),
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)',
-                    borderRight: i < 5 ? '1px solid rgba(255,255,255,0.1)' : 'none'
-                  }}>{h}</th>
+                {[
+                  { label: 'CUSTOMER IDENTITY', key: 'name' },
+                  { label: 'CONTACT CONNECT', key: 'email' },
+                  { label: 'SERVICES/INTERESTS', key: null },
+                  { label: 'CHANNEL', key: 'channel' },
+                  { label: 'LIFETIME VALUE', key: 'totalSpent', align: 'right' },
+                  { label: 'ACTIONS', key: null, align: 'center' }
+                ].map((h, i) => (
+                  <th 
+                    key={h.label} 
+                    onClick={() => h.key && handleSort(h.key)}
+                    style={{
+                      padding: '12px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
+                      textTransform: 'uppercase', letterSpacing: '0.06em',
+                      textAlign: h.align || 'left',
+                      background: 'linear-gradient(180deg, #32FC05, #166534)',
+                      borderRight: i < 5 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                      cursor: h.key ? 'pointer' : 'default',
+                      userSelect: 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: h.align === 'right' ? 'flex-end' : (h.align === 'center' ? 'center' : 'flex-start'), gap: '4px' }}>
+                      {h.label}
+                      {sortConfig.key === h.key && (
+                        sortConfig.direction === 'asc' ? <TrendingUp size={10} style={{ transform: 'rotate(0deg)' }} /> : <TrendingUp size={10} style={{ transform: 'rotate(180deg) scaleX(-1)' }} />
+                      )}
+                    </div>
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -601,7 +659,7 @@ const ManageCustomers = () => {
                 <tr key={customer.id} className="hover-row" style={{ background: idx % 2 === 0 ? 'white' : '#f8fafc', borderBottom: '1px solid #f1f5f9 transition: background 0.2s' }}>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.7rem' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #32FC05, #32CD32)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.7rem' }}>
                         {(customer.name || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -617,7 +675,7 @@ const ManageCustomers = () => {
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                       {customer.services ? customer.services.split(',').map((s, i) => (
-                        <span key={i} style={{ fontSize: '0.58rem', fontWeight: 900, background: '#f1f5f9', color: '#1B5E20', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>{s.trim()}</span>
+                        <span key={i} style={{ fontSize: '0.58rem', fontWeight: 900, background: '#f1f5f9', color: '#32FC05', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>{s.trim()}</span>
                       )) : <span style={{ color: '#94a3b8' }}>—</span>}
                     </div>
                   </td>
@@ -627,15 +685,15 @@ const ManageCustomers = () => {
                     </span>
                   </td>
                   <td style={{ padding: '12px 14px', textAlign: 'right' }}>
-                    <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#1B5E20' }}>{fmtAmt(customer.totalSpent || 0, currency)}</div>
+                    <div style={{ fontWeight: 900, fontSize: '0.85rem', color: '#32FC05' }}>{fmtAmt(customer.totalSpent || 0, currency)}</div>
                     <div style={{ fontSize: '0.55rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Gross Contribution</div>
                   </td>
                   <td style={{ padding: '12px 14px' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
                       <button onClick={() => openMessageCenter(customer)} title="Send Message" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#d97706', cursor: 'pointer' }}><Mail size={14} /></button>
-                      <button onClick={() => generateCustomerReport(customer)} title="Detailed Report" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1B5E20', cursor: 'pointer' }}><FileText size={14} /></button>
+                      <button onClick={() => generateCustomerReport(customer)} title="Detailed Report" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#32FC05', cursor: 'pointer' }}><FileText size={14} /></button>
                       <button onClick={() => { setSelectedCustomer(customer); setIsDetailsOpen(true); }} title="Profile Overview" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#0369a1', cursor: 'pointer' }}><Eye size={14} /></button>
-                      <button onClick={() => { setInitialContractData({ clientName: customer.name, clientEmail: customer.email, clientPhone: customer.phone, clientAddress: customer.address }); setShowContractGenerator(true); }} title="Legal Contract" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1B5E20', cursor: 'pointer' }}><Shield size={14} /></button>
+                      <button onClick={() => { setInitialContractData({ clientName: customer.name, clientEmail: customer.email, clientPhone: customer.phone, clientAddress: customer.address }); setShowContractGenerator(true); }} title="Legal Contract" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#32FC05', cursor: 'pointer' }}><Shield size={14} /></button>
                       <button onClick={() => openEditModal(customer)} title="Modify Profile" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1e40af', cursor: 'pointer' }}><Edit size={14} /></button>
                       {isSuper && <button onClick={() => setDeleteConfirm(customer)} title="Delete Master Record" style={{ padding: '6px', borderRadius: '6px', background: '#fef2f2', border: '1px solid #fee2e2', color: '#dc2626', cursor: 'pointer' }}><Trash2 size={14} /></button>}
                     </div>
@@ -674,7 +732,7 @@ const ManageCustomers = () => {
       {isDetailsOpen && selectedCustomer && (
         <div className="modal-overlay" onClick={() => setIsDetailsOpen(false)}>
           <div className="modal-content animate-fadeIn" style={{ maxWidth: '550px', width: '90%', borderRadius: '24px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-            <div style={{ padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontSize: '0.65rem', fontWeight: 900, opacity: 0.8, textTransform: 'uppercase', marginBottom: '6px' }}>Customer Profile</div>
@@ -709,7 +767,7 @@ const ManageCustomers = () => {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#64748b', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>
                       <DollarSign size={12} /> Lifetime Value
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1B5E20' }}>RWF {(selectedCustomer.totalSpent || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#32FC05' }}>RWF {(selectedCustomer.totalSpent || 0).toLocaleString()}</div>
                   </div>
                 </div>
               )}
@@ -719,7 +777,7 @@ const ManageCustomers = () => {
                   <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Services</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {selectedCustomer.services.split(',').map((s, idx) => (
-                      <span key={idx} style={{ background: '#1B5E20', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>{s.trim()}</span>
+                      <span key={idx} style={{ background: '#32FC05', color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>{s.trim()}</span>
                     ))}
                   </div>
                 </div>
@@ -744,7 +802,7 @@ const ManageCustomers = () => {
               </div>
 
               <div style={{ paddingTop: '1rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => setIsDetailsOpen(false)} style={{ background: '#1B5E20', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>CLOSE</button>
+                <button onClick={() => setIsDetailsOpen(false)} style={{ background: '#32FC05', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}>CLOSE</button>
               </div>
             </div>
           </div>
@@ -776,7 +834,7 @@ const ManageCustomers = () => {
       {isModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '680px', width: '95%', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {editingCustomer ? <Edit size={22} /> : <UserPlus size={22} />}
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#f9fafcff' }}>
@@ -896,7 +954,7 @@ const ManageCustomers = () => {
                       style={{ 
                         display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.85rem', cursor: 'pointer', padding: '10px 14px', 
                         background: formData.services.includes(service) ? '#f0fdf4' : 'white', borderRadius: '10px', border: '1px solid', 
-                        borderColor: formData.services.includes(service) ? '#1B5E20' : '#e2e8f0', transition: 'all 0.2s ease', fontWeight: formData.services.includes(service) ? 700 : 600
+                        borderColor: formData.services.includes(service) ? '#32FC05' : '#e2e8f0', transition: 'all 0.2s ease', fontWeight: formData.services.includes(service) ? 700 : 600
                       }}
                     >
                       <input 
@@ -905,7 +963,7 @@ const ManageCustomers = () => {
                           const newServices = e.target.checked ? [...formData.services, service] : formData.services.filter(s => s !== service);
                           setFormData({...formData, services: newServices});
                         }}
-                        style={{ accentColor: '#1B5E20', width: '18px', height: '18px', cursor: 'pointer' }}
+                        style={{ accentColor: '#32FC05', width: '18px', height: '18px', cursor: 'pointer' }}
                       />
                       {service}
                     </label>
@@ -931,7 +989,7 @@ const ManageCustomers = () => {
                 </button>
                 <button 
                   type="submit" disabled={isSubmitting}
-                  style={{ background: '#1B5E20', color: 'white', border: 'none', padding: '12px 36px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                  style={{ background: '#32FC05', color: 'white', border: 'none', padding: '12px 36px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                 >
                   {isSubmitting ? <><RefreshCw size={18} className="spin" /> {editingCustomer ? 'UPDATING...' : 'REGISTERING...'}</> : editingCustomer ? 'UPDATE CRM PROFILE' : 'AUTHORIZE MEMBER'}
                 </button>
@@ -1008,7 +1066,7 @@ const ManageCustomers = () => {
               
               <div className="form-group">
                 <label>Total Price (Auto-Calculated)</label>
-                <input type="number" readOnly value={(requestData.unitPrice * requestData.quantity) || 0} style={{ background: '#f8fafc', color: '#1B5E20', fontWeight: 800 }} />
+                <input type="number" readOnly value={(requestData.unitPrice * requestData.quantity) || 0} style={{ background: '#f8fafc', color: '#32FC05', fontWeight: 800 }} />
               </div>
               
               <div className="modal-actions">

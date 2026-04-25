@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
 
     const themes = {
       green: {
-        primary: '#1B5E20',
+        primary: '#32FC05',
         secondary: '#32CD32',
         accent: '#A5D6A7',
         background: '#F8FAFC',
