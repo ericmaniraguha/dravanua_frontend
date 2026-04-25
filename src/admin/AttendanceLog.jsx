@@ -227,10 +227,10 @@ const AttendanceLog = () => {
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 950, margin: '0', letterSpacing: '-0.02em', color: '#000000' }}>
+          <h2 style={{ fontSize: '3rem', fontWeight: 950, margin: '0', letterSpacing: '-0.02em', color: 'black' }}>
             {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </h2>
-          <p style={{ color: '#000000', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '8px', fontSize: '0.85rem' }}>
+          <p style={{ color: 'black', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '8px', fontSize: '0.85rem' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -285,7 +285,7 @@ const AttendanceLog = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', color: 'black', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>TOTAL SESSIONS</div>
@@ -293,7 +293,7 @@ const AttendanceLog = () => {
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>COLLECTIVE HOURS</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#000000' }}>{showBalances ? totalCalculatedHours : '••••••'} hrs</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'black' }}>{showBalances ? totalCalculatedHours : '••••••'} hrs</div>
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>UNIQUE STAFF</div>
@@ -411,7 +411,7 @@ const AttendanceLog = () => {
 
       {/* Attendance Table */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — ATTENDANCE & WORKFORCE RECORDS

@@ -1,5 +1,6 @@
 # Build stage
-FROM node:18-alpine as build-stage
+ARG NODE_VERSION=20.20-alpine
+FROM node:${NODE_VERSION} as build-stage
 
 WORKDIR /app
 
