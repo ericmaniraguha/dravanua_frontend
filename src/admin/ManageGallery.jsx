@@ -98,7 +98,7 @@ const ManageGallery = () => {
         <div style={{ marginBottom: '3rem', background: '#f8fafc', padding: '2rem', borderRadius: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
            <div>
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#1B5E20' }}>Portfolio Provisioning</h2>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#32FC05' }}>Portfolio Provisioning</h2>
               <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Provision single assets or use the high-fidelity bulk importer for departmental clusters.</p>
            </div>
            <div style={{ display: 'flex', gap: '1rem' }}>
@@ -193,7 +193,7 @@ const ManageGallery = () => {
            </div>
            <div style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 600, textAlign: 'right' }}>
             {items.length} Production Assets Managed<br/>
-            <span style={{ fontSize: '0.7rem', color: '#1B5E20' }}>Live Network Status: Operational</span>
+            <span style={{ fontSize: '0.7rem', color: '#32FC05' }}>Live Network Status: Operational</span>
           </div>
         </div>
         </div>
@@ -219,13 +219,13 @@ const ManageGallery = () => {
                 {item.isFeatured && (
                   <div style={{ background: '#32CD32', color: 'white', padding: '5px 12px', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', boxShadow: '0 4px 10px rgba(50, 205, 50, 0.3)' }}>Featured</div>
                 )}
-                <div style={{ background: 'rgba(255,255,255,0.95)', color: '#1B5E20', padding: '5px 12px', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', border: '1px solid #e2e8f0' }}>{item.category}</div>
+                <div style={{ background: 'rgba(255,255,255,0.95)', color: '#32FC05', padding: '5px 12px', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', border: '1px solid #e2e8f0' }}>{item.category}</div>
               </div>
             </div>
             <div style={{ padding: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                 <div style={{ width: '100%' }}>
-                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 900, color: '#1B5E20', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 900, color: '#32FC05', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
                     <span>📅 {item.portfolioYear || '2026'}</span>
                     {item.clientName && <span>👤 Client: {item.clientName}</span>}
@@ -241,7 +241,7 @@ const ManageGallery = () => {
       {isModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '680px', width: '95%', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: '#1B5E20', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: '#32FC05', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   {editingItem ? <Edit size={22} /> : <Image size={22} />}
                   <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#f9fafcff' }}>

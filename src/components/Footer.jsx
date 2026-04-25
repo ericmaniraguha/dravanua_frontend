@@ -90,6 +90,12 @@ const Footer = () => {
               <Link to="/services" className="footer-link">💐 Flower Shop</Link>
               <Link to="/services" className="footer-link">💍 Classic Fashion Styling</Link>
             </div>
+            
+            <h4 className="footer-heading" style={{ marginTop: '2rem' }}>About Us</h4>
+            <div className="footer-links">
+              <Link to="/about" className="footer-link">🌿 Our Story</Link>
+              <Link to="/partners" className="footer-link">🤝 References & Partners</Link>
+            </div>
           </div>
 
           {/* Contact Info */}

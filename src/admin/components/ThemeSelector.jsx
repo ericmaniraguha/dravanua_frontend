@@ -6,7 +6,7 @@ const ThemeSelector = () => {
   const { theme, setTheme } = useTheme();
 
   const themes = [
-    { id: 'green', name: 'Emerald', icon: <Sparkles size={14} />, color: '#1B5E20' },
+    { id: 'green', name: 'Emerald', icon: <Sparkles size={14} />, color: '#32FC05' },
     { id: 'blue', name: 'Ocean', icon: <Droplets size={14} />, color: '#1565C0' },
     { id: 'purple', name: 'Royal', icon: <Palette size={14} />, color: '#6A1B9A' },
     { id: 'dark', name: 'Midnight', icon: <Moon size={14} />, color: '#111827' }

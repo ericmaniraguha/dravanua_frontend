@@ -75,7 +75,7 @@ const InfoPanel = ({ title, description, formula, serves }) => {
     >
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
+        background: 'linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%)',
         padding: '13px 16px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
       }}>
@@ -105,7 +105,7 @@ const InfoPanel = ({ title, description, formula, serves }) => {
         {/* Formula */}
         {formula && (
           <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '9px 12px', borderLeft: '3px solid #16a34a' }}>
-            <div style={{ fontSize: '0.58rem', fontWeight: 900, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 900, color: '#32FC05', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>
               🔢 Calculation Formula
             </div>
             <code style={{ fontSize: '0.71rem', color: '#15803d', fontFamily: 'monospace', display: 'block', lineHeight: 1.5, wordBreak: 'break-word' }}>
@@ -146,10 +146,10 @@ const InfoPanel = ({ title, description, formula, serves }) => {
         style={{
           background: open ? 'rgba(27,94,32,0.08)' : 'none',
           border: '1.5px solid',
-          borderColor: open ? '#1B5E20' : 'transparent',
+          borderColor: open ? 'var(--primary-dark)' : 'transparent',
           borderRadius: '50%',
           cursor: 'pointer',
-          color: open ? '#1B5E20' : '#94a3b8',
+          color: open ? 'var(--primary-dark)' : '#94a3b8',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: '26px', height: '26px',
           padding: 0,
@@ -256,7 +256,7 @@ const BusinessAnalytics = () => {
       <div class="section-title">Performance Intelligence Summary</div>
       <div class="metrics-grid">
         <div class="metric-card"><span class="metric-val">${summary.totalRevenue?.toLocaleString() || 0} RWF</span><span class="metric-lbl">Total Gross Revenue</span></div>
-        <div class="metric-card"><span class="metric-val" style="color:#1B5E20">${summary.netProfit?.toLocaleString() || 0} RWF</span><span class="metric-lbl">Net Operational Profit</span></div>
+        <div class="metric-card"><span class="metric-val" style="color:var(--primary-dark)">${summary.netProfit?.toLocaleString() || 0} RWF</span><span class="metric-lbl">Net Operational Profit</span></div>
         <div class="metric-card"><span class="metric-val">${summary.totalCustomers || 0}</span><span class="metric-lbl">Registered Clients</span></div>
         <div class="metric-card"><span class="metric-val">${summary.workingDaysCount || 0}</span><span class="metric-lbl">Logged Work Days</span></div>
       </div>
@@ -280,7 +280,7 @@ const BusinessAnalytics = () => {
                 <td><strong>${emp.name}</strong></td>
                 <td style="text-align:center">${emp.workingDays}</td>
                 <td style="text-align:center"><span class="badge badge-blue">Rank ${emp.efficiency}%</span></td>
-                <td style="text-align:right; font-weight:900; color:#1B5E20">${emp.incomeGenerated.toLocaleString()} RWF</td>
+                <td style="text-align:right; font-weight:900; color:var(--primary-dark)">${emp.incomeGenerated.toLocaleString()} RWF</td>
                 <td>
                   <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${ratio}%"></div></div>
                 </td>
@@ -307,19 +307,19 @@ const BusinessAnalytics = () => {
     `;
 
     const page2Html = `
-      <div style="background:#1B5E20; color:white; padding:15px; border-radius:8px; text-align:center; font-weight:900; font-size:18px; margin-bottom:20px;">
+      <div style="background:var(--primary-dark); color:white; padding:15px; border-radius:8px; text-align:center; font-weight:900; font-size:18px; margin-bottom:20px;">
         DRAVANUA HUB OPERATIONAL AUDIT LOG - ${new Date().getFullYear()}
       </div>
       
       <table>
         <thead style="background:#e8f5e9;">
           <tr>
-            <th style="color:#1B5E20">S/N</th>
-            <th style="color:#1B5E20">Date</th>
-            <th style="color:#1B5E20">Service Classification</th>
-            <th style="color:#1B5E20">Staff Lead</th>
-            <th style="color:#1B5E20; text-align:right">Revenue (RWF)</th>
-            <th style="color:#1B5E20">Certification</th>
+            <th style="color:var(--primary-dark)">S/N</th>
+            <th style="color:var(--primary-dark)">Date</th>
+            <th style="color:var(--primary-dark)">Service Classification</th>
+            <th style="color:var(--primary-dark)">Staff Lead</th>
+            <th style="color:var(--primary-dark); text-align:right">Revenue (RWF)</th>
+            <th style="color:var(--primary-dark)">Certification</th>
           </tr>
         </thead>
         <tbody>
@@ -335,7 +335,7 @@ const BusinessAnalytics = () => {
           `).join('')}
           <tr style="background:#fffde7">
             <td colspan="4" style="text-align:right; font-weight:900">CONSOLIDATED OPERATIONS YIELD:</td>
-            <td style="text-align:right; font-weight:900; color:#1B5E20">${summary.totalRevenue?.toLocaleString()} RWF</td>
+            <td style="text-align:right; font-weight:900; color:var(--primary-dark)">${summary.totalRevenue?.toLocaleString()} RWF</td>
             <td></td>
           </tr>
         </tbody>
@@ -402,14 +402,14 @@ const BusinessAnalytics = () => {
   const getEmailHtml = () => {
     return `
       <div style="font-family:Inter,sans-serif;max-width:700px;margin:0 auto">
-        <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:24px;border-radius:12px;color:white;margin-bottom:20px">
+        <div style="background:linear-gradient(135deg,var(--primary-dark),var(--secondary));padding:24px;border-radius:12px;color:white;margin-bottom:20px">
           <h1 style="margin:0;font-size:20px">DRAVANUA HUB — Performance Intelligence Report</h1>
           <p style="margin:8px 0 0;opacity:.8">Period: ${summary.period || 'All Time'} | Generated: ${new Date().toLocaleDateString()}</p>
         </div>
         <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
           <tr style="background:#f0fdf4">
             <td style="padding:12px;font-weight:700">Total Revenue</td>
-            <td style="padding:12px;color:#1B5E20;font-weight:900">${fmtAmt(summary.totalRevenue, currency)}</td>
+            <td style="padding:12px;color:var(--primary-dark);font-weight:900">${fmtAmt(summary.totalRevenue, currency)}</td>
           </tr>
           <tr>
             <td style="padding:12px;font-weight:700">Operational Expenses</td>
@@ -417,7 +417,7 @@ const BusinessAnalytics = () => {
           </tr>
           <tr style="background:#f0fdf4">
             <td style="padding:12px;font-weight:700">Net Profit</td>
-            <td style="padding:12px;color:#166534;font-weight:900">${fmtAmt(summary.netProfit, currency)}</td>
+            <td style="padding:12px;color:#32FC05;font-weight:900">${fmtAmt(summary.netProfit, currency)}</td>
           </tr>
           <tr>
             <td style="padding:12px;font-weight:700">Total Bookings</td>
@@ -428,9 +428,9 @@ const BusinessAnalytics = () => {
             <td style="padding:12px;font-weight:700">${summary.totalCustomers || 0}</td>
           </tr>
         </table>
-        <h3 style="color:#1B5E20;border-bottom:2px solid #e8f5e9;padding-bottom:8px">Staff Contributions</h3>
+        <h3 style="color:var(--primary-dark);border-bottom:2px solid #e8f5e9;padding-bottom:8px">Staff Contributions</h3>
         <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-          <thead><tr style="background:#1B5E20;color:white">
+          <thead><tr style="background:var(--primary-dark);color:white">
             <th style="padding:10px;text-align:left">Name</th>
             <th style="padding:10px;text-align:right">Income Generated</th>
             <th style="padding:10px;text-align:center">Working Days</th>
@@ -438,7 +438,7 @@ const BusinessAnalytics = () => {
           <tbody>${employeeRates.map((e, i) => `
             <tr style="background:${i % 2 === 0 ? '#fafff9' : 'white'}">
               <td style="padding:10px">${e.name}</td>
-              <td style="padding:10px;text-align:right;font-weight:700;color:#1B5E20">${fmtAmt(e.incomeGenerated, currency)}</td>
+              <td style="padding:10px;text-align:right;font-weight:700;color:var(--primary-dark)">${fmtAmt(e.incomeGenerated, currency)}</td>
               <td style="padding:10px;text-align:center">${e.workingDays}</td>
             </tr>`).join('')}
           </tbody>
@@ -526,7 +526,7 @@ const BusinessAnalytics = () => {
                   {['7d', '30d', 'all'].map(p => (
                     <button key={p} onClick={() => handlePeriodChange(p)}
                       style={{ padding: '6px 18px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, border: 'none', cursor: 'pointer',
-                        background: period === p ? 'white' : 'transparent', color: period === p ? '#1B5E20' : '#777',
+                        background: period === p ? 'white' : 'transparent', color: period === p ? 'var(--primary-dark)' : '#777',
                         boxShadow: period === p ? '0 2px 8px rgba(0,0,0,0.06)' : 'none', transition: 'all 0.2s ease' }}
                     >
                       {p === '7d' ? 'Weekly' : p === '30d' ? 'Monthly' : 'All Time'}
@@ -546,7 +546,7 @@ const BusinessAnalytics = () => {
                </div>
                <button onClick={handleCustomDateApply} disabled={!customStart || !customEnd}
                  style={{ height: '34px', padding: '0 14px', borderRadius: '8px', border: 'none',
-                   background: (customStart && customEnd) ? '#1B5E20' : '#eee', color: (customStart && customEnd) ? 'white' : '#999',
+                   background: (customStart && customEnd) ? 'var(--primary-dark)' : '#eee', color: (customStart && customEnd) ? 'white' : '#999',
                    fontSize: '0.75rem', fontWeight: 800, cursor: (customStart && customEnd) ? 'pointer' : 'default' }}>Apply</button>
             </div>
 
@@ -554,7 +554,7 @@ const BusinessAnalytics = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#999', textTransform: 'uppercase' }}>Primary Unit:</span>
               <select value={department} onChange={(e) => {setDepartment(e.target.value); setChartMode(e.target.value === 'All Units' ? 'Consolidated' : 'Isolated')}}
-                style={{ height: '38px', padding: '0 12px', borderRadius: '12px', border: '2px solid #32CD32', background: '#fcfdfc', fontSize: '0.85rem', fontWeight: 800, outline: 'none', color: '#1B5E20' }}>
+                style={{ height: '38px', padding: '0 12px', borderRadius: '12px', border: '2px solid var(--primary)', background: '#fcfdfc', fontSize: '0.85rem', fontWeight: 800, outline: 'none', color: 'var(--primary-dark)' }}>
                 <option value="All Units">📊 Consolidated Hub</option>
                 <option value="Studio">📸 Studio Operations</option>
                 <option value="Papeterie">📄 Papeterie Unit</option>
@@ -586,7 +586,7 @@ const BusinessAnalytics = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '8px 14px' }}>
                 <Shield size={14} color="#16a34a" />
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#166534' }}>Your Department Only</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#32FC05' }}>Your Department Only</span>
               </div>
             </div>
           )}
@@ -616,7 +616,7 @@ const BusinessAnalytics = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontSize: '1.4rem' }}>
-              <Activity size={24} color="#1B5E20" /> Revenue & Staff Performance Overview
+              <Activity size={24} color="var(--primary-dark)" /> Revenue & Staff Performance Overview
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '4px' }}>
               Consolidated view of revenue generation vs. operational expenses with staff contribution breakdown.
@@ -632,16 +632,16 @@ const BusinessAnalytics = () => {
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', background: '#f8fafc', padding: '10px 15px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#32CD32' }}></div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20' }}>Revenue</span>
+              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--primary)' }}></div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)' }}>Revenue</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#dc2626' }}></div>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#dc2626' }}>Expenses</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#1B5E20' }}></div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20' }}>Net Profit</span>
+              <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--primary-dark)' }}></div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)' }}>Net Profit</span>
             </div>
           </div>
         </div>
@@ -655,9 +655,9 @@ const BusinessAnalytics = () => {
           return (
             <div style={{ marginBottom: '2.5rem' }}>
               {[
-                { label: 'Total Revenue', value: rev, pct: (rev / maxVal) * 100, color: 'linear-gradient(90deg, #1B5E20, #32CD32)', textColor: '#1B5E20' },
+                { label: 'Total Revenue', value: rev, pct: (rev / maxVal) * 100, color: 'linear-gradient(90deg, var(--primary-dark), var(--primary))', textColor: 'var(--primary-dark)' },
                 { label: 'Operational Expenses', value: exp, pct: (exp / maxVal) * 100, color: 'linear-gradient(90deg, #b91c1c, #dc2626)', textColor: '#dc2626' },
-                { label: 'Net Profit', value: net, pct: (Math.abs(net) / maxVal) * 100, color: net >= 0 ? 'linear-gradient(90deg, #166534, #22c55e)' : 'linear-gradient(90deg, #9f1239, #dc2626)', textColor: net >= 0 ? '#166534' : '#dc2626' },
+                { label: 'Net Profit', value: net, pct: (Math.abs(net) / maxVal) * 100, color: net >= 0 ? 'linear-gradient(90deg, #32FC05, #22c55e)' : 'linear-gradient(90deg, #9f1239, #dc2626)', textColor: net >= 0 ? '#32FC05' : '#dc2626' },
               ].map((row, i) => (
                 <div key={i} style={{ marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 800, marginBottom: '8px' }}>
@@ -689,7 +689,7 @@ const BusinessAnalytics = () => {
           const chartH = 200;
           const barW = Math.min(80, Math.floor(900 / employeeRates.length) - 20);
           const gap = Math.floor(900 / employeeRates.length);
-          const colors = ['#1B5E20','#2E7D32','#388E3C','#43A047','#4CAF50','#66BB6A'];
+          const colors = ['var(--primary-dark)','var(--secondary)','#388E3C','#43A047','#4CAF50','#66BB6A'];
           return (
             <div>
               <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>
@@ -715,7 +715,7 @@ const BusinessAnalytics = () => {
                         <text x={x + barW / 2} y={chartH + 15} textAnchor="middle" style={{ fontSize: '9px', fill: '#475569', fontWeight: 700 }}>
                           {emp.name.split(' ')[0]}
                         </text>
-                        <text x={x + barW / 2} y={y - 5} textAnchor="middle" style={{ fontSize: '8px', fill: '#1B5E20', fontWeight: 900 }}>
+                        <text x={x + barW / 2} y={y - 5} textAnchor="middle" style={{ fontSize: '8px', fill: 'var(--primary-dark)', fontWeight: 900 }}>
                           {((emp.incomeGenerated || 0) / 1000).toFixed(0)}K
                         </text>
                       </g>
@@ -737,12 +737,12 @@ const BusinessAnalytics = () => {
 
       {/* Primary KPI Grid */}
       <div className="admin-stats-grid" style={{ marginBottom: '3rem' }}>
-        <div className="admin-stat-card" style={{ borderTop: '4px solid #32CD32' }}>
-          <div className="admin-stat-icon" style={{ background: '#e8f5e9', color: '#32CD32' }}><DollarSign size={24} /></div>
+        <div className="admin-stat-card" style={{ borderTop: '4px solid var(--primary)' }}>
+          <div className="admin-stat-icon" style={{ background: '#e8f5e9', color: 'var(--primary)' }}><DollarSign size={24} /></div>
           <div className="admin-stat-info">
             <span className="admin-stat-label">Total Flow Yield</span>
             <span className="admin-stat-value">{summary.totalRevenue?.toLocaleString()} RWF</span>
-            <span style={{ fontSize: '0.7rem', color: '#2E7D32', fontWeight: 800 }}>↑ Gross Growth</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 800 }}>↑ Gross Growth</span>
           </div>
         </div>
         <div className="admin-stat-card" style={{ borderTop: '4px solid #dc2626' }}>
@@ -761,12 +761,12 @@ const BusinessAnalytics = () => {
             <span style={{ fontSize: '0.7rem', color: '#6366f1', fontWeight: 800 }}>⚡ Monthly Recurring</span>
           </div>
         </div>
-        <div className="admin-stat-card" style={{ borderTop: '4px solid #1B5E20' }}>
-          <div className="admin-stat-icon" style={{ background: '#f1f8e9', color: '#1B5E20' }}><Target size={24} /></div>
+        <div className="admin-stat-card" style={{ borderTop: '4px solid var(--primary-dark)' }}>
+          <div className="admin-stat-icon" style={{ background: '#f1f8e9', color: 'var(--primary-dark)' }}><Target size={24} /></div>
           <div className="admin-stat-info">
             <span className="admin-stat-label">Net Operational Profit</span>
-            <span className="admin-stat-value" style={{ color: '#1B5E20' }}>{fmtAmt(summary.netProfit || 0, currency)}</span>
-            <span style={{ fontSize: '0.7rem', color: '#2E7D32', fontWeight: 800 }}>Safe Margin Verified</span>
+            <span className="admin-stat-value" style={{ color: 'var(--primary-dark)' }}>{fmtAmt(summary.netProfit || 0, currency)}</span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--secondary)', fontWeight: 800 }}>Safe Margin Verified</span>
           </div>
         </div>
         <div className="admin-stat-card">
@@ -801,7 +801,7 @@ const BusinessAnalytics = () => {
                    <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
                      <circle cx="18" cy="18" r="16" fill="transparent" stroke="#f0f2f0" strokeWidth="3" />
                      {/* Revenue Segment - calculated from real data */}
-                     <circle cx="18" cy="18" r="16" fill="transparent" stroke="#32CD32" strokeWidth="3"
+                     <circle cx="18" cy="18" r="16" fill="transparent" stroke="var(--primary)" strokeWidth="3"
                        strokeDasharray={`${summary.totalRevenue && (summary.totalRevenue + (summary.operationalExpenses || 0)) > 0 ? ((summary.totalRevenue / (summary.totalRevenue + (summary.operationalExpenses || 0))) * 100).toFixed(0) : 75} 100`}
                        strokeLinecap="round" className="svg-animate-stroke" />
                      {/* Expense Segment */}
@@ -822,7 +822,7 @@ const BusinessAnalytics = () => {
 
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                     <div style={{ width: '12px', height: '12px', background: '#32CD32', borderRadius: '3px' }}></div>
+                     <div style={{ width: '12px', height: '12px', background: 'var(--primary)', borderRadius: '3px' }}></div>
                      <div>
                         <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>Revenue Generation</div>
                         <div style={{ fontSize: '0.75rem', color: '#888' }}>{fmtAmt(summary.totalRevenue || 0, currency)}</div>
@@ -872,10 +872,10 @@ const BusinessAnalytics = () => {
                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700 }}>
                          <span>Total Revenue</span>
-                         <span style={{ color: '#166534' }}>{revPct}% of Flow</span>
+                         <span style={{ color: '#32FC05' }}>{revPct}% of Flow</span>
                        </div>
                        <div style={{ height: '30px', display: 'flex', gap: '4px' }}>
-                         <div style={{ height: '100%', width: `${revPct}%`, background: 'linear-gradient(90deg, #166534, #16a34a)', borderRadius: '6px 0 0 6px', display: 'flex', alignItems: 'center', paddingLeft: '10px', color: 'white', fontSize: '0.7rem', fontWeight: 900 }}>{fmtAmt(summary.totalRevenue || 0, currency)}</div>
+                         <div style={{ height: '100%', width: `${revPct}%`, background: 'linear-gradient(90deg, #32FC05, #16a34a)', borderRadius: '6px 0 0 6px', display: 'flex', alignItems: 'center', paddingLeft: '10px', color: 'white', fontSize: '0.7rem', fontWeight: 900 }}>{fmtAmt(summary.totalRevenue || 0, currency)}</div>
                          {100 - revPct > 0 && <div style={{ height: '100%', width: `${100 - revPct}%`, background: '#f1f5f9', borderRadius: '0 6px 6px 0' }}></div>}
                        </div>
                      </div>
@@ -892,10 +892,10 @@ const BusinessAnalytics = () => {
                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700 }}>
                          <span>Net Profit</span>
-                         <span style={{ color: summary.netProfit >= 0 ? '#166534' : '#dc2626' }}>{summary.totalRevenue ? ((summary.netProfit / summary.totalRevenue) * 100).toFixed(1) : 0}% Margin</span>
+                         <span style={{ color: summary.netProfit >= 0 ? '#32FC05' : '#dc2626' }}>{summary.totalRevenue ? ((summary.netProfit / summary.totalRevenue) * 100).toFixed(1) : 0}% Margin</span>
                        </div>
                        <div style={{ height: '30px', display: 'flex', borderRadius: '6px', overflow: 'hidden' }}>
-                         <div style={{ height: '100%', width: `${summary.totalRevenue ? Math.max(0, Math.min(100, (summary.netProfit / summary.totalRevenue) * 100)) : 0}%`, background: summary.netProfit >= 0 ? 'linear-gradient(90deg, #1B5E20, #32CD32)' : '#dc2626', display: 'flex', alignItems: 'center', paddingLeft: '10px', color: 'white', fontSize: '0.7rem', fontWeight: 900 }}>{fmtAmt(summary.netProfit || 0, currency)}</div>
+                         <div style={{ height: '100%', width: `${summary.totalRevenue ? Math.max(0, Math.min(100, (summary.netProfit / summary.totalRevenue) * 100)) : 0}%`, background: summary.netProfit >= 0 ? 'linear-gradient(90deg, var(--primary-dark), var(--primary))' : '#dc2626', display: 'flex', alignItems: 'center', paddingLeft: '10px', color: 'white', fontSize: '0.7rem', fontWeight: 900 }}>{fmtAmt(summary.netProfit || 0, currency)}</div>
                        </div>
                      </div>
                    </>
@@ -932,7 +932,7 @@ const BusinessAnalytics = () => {
                      <div style={{
                         width: `${maxStaffIncome > 0 ? (emp.incomeGenerated / maxStaffIncome) * 100 : 0}%`,
                         height: '100%',
-                        background: 'linear-gradient(90deg, #32CD32, #1B5E20)',
+                        background: 'linear-gradient(90deg, var(--primary), var(--primary-dark))',
                         borderRadius: '20px',
                         transition: 'width 1s ease-out'
                      }}></div>
@@ -961,7 +961,7 @@ const BusinessAnalytics = () => {
           <div style={{ padding: '0 1.5rem 1.5rem' }}>
             {[
               { label: 'Total Bookings', value: summary.totalBookings || 0, color: '#1565c0' },
-              { label: 'Registered Clients', value: summary.totalCustomers || 0, color: '#1B5E20' },
+              { label: 'Registered Clients', value: summary.totalCustomers || 0, color: 'var(--primary-dark)' },
               { label: 'Working Days Logged', value: summary.workingDaysCount || 0, color: '#9d174d' },
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: '1.25rem' }}>
@@ -1003,7 +1003,7 @@ const BusinessAnalytics = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', marginTop: '5px' }}>
               <span style={{ fontSize: '0.85rem', fontWeight: 900 }}>Net Operational Profit</span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (summary.netProfit || 0) >= 0 ? '#166534' : '#dc2626' }}>{fmtAmt(summary.netProfit || 0, currency)}</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 900, color: (summary.netProfit || 0) >= 0 ? '#32FC05' : '#dc2626' }}>{fmtAmt(summary.netProfit || 0, currency)}</span>
             </div>
           </div>
         </div>
@@ -1026,10 +1026,10 @@ const BusinessAnalytics = () => {
                 <div key={i} style={{ marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 800, marginBottom: '5px' }}>
                     <span>{dept}</span>
-                    <span style={{ color: '#1B5E20' }}>{fmtAmt(Number(rev) || 0, currency)}</span>
+                    <span style={{ color: 'var(--primary-dark)' }}>{fmtAmt(Number(rev) || 0, currency)}</span>
                   </div>
                   <div style={{ height: '6px', background: '#f5f5f5', borderRadius: '10px', overflow: 'hidden' }}>
-                    <div style={{ width: `${(Number(rev) / maxCatRev) * 100}%`, height: '100%', background: ['#673ab7','#3f51b5','#2196f3','#00bcd4','#1B5E20','#dc2626'][i % 6], borderRadius: '10px' }}></div>
+                    <div style={{ width: `${(Number(rev) / maxCatRev) * 100}%`, height: '100%', background: ['#673ab7','#3f51b5','#2196f3','#00bcd4','var(--primary-dark)','#dc2626'][i % 6], borderRadius: '10px' }}></div>
                   </div>
                 </div>
               ));
@@ -1079,7 +1079,7 @@ const BusinessAnalytics = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                       <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Client Base</span>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 900, color: '#1B5E20' }}>{clients.toLocaleString()} Clients</span>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary-dark)' }}>{clients.toLocaleString()} Clients</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Avg Revenue</span>
@@ -1112,10 +1112,10 @@ const BusinessAnalytics = () => {
                    <div key={i}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 800, marginBottom: '5px' }}>
                        <span>{c.name} <span style={{ color: '#94a3b8', fontWeight: 600 }}>({c.count} bookings)</span></span>
-                       <span style={{ color: '#1B5E20' }}>{fmtAmt(c.total || 0, currency)}</span>
+                       <span style={{ color: 'var(--primary-dark)' }}>{fmtAmt(c.total || 0, currency)}</span>
                      </div>
                      <div style={{ height: '6px', background: '#f5f5f5', borderRadius: '10px', overflow: 'hidden' }}>
-                       <div style={{ width: `${(c.total / maxClient) * 100}%`, height: '100%', background: ['#1B5E20','#3f51b5','#673ab7','#E65100','#dc2626'][i % 5], borderRadius: '10px' }}></div>
+                       <div style={{ width: `${(c.total / maxClient) * 100}%`, height: '100%', background: ['var(--primary-dark)','#3f51b5','#673ab7','#E65100','#dc2626'][i % 5], borderRadius: '10px' }}></div>
                      </div>
                    </div>
                  ));
@@ -1128,7 +1128,7 @@ const BusinessAnalytics = () => {
 
       <div className="admin-card">
         <div className="admin-card-header" style={{ padding: '1.5rem' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', margin: 0 }}><Activity size={18} color="#2E7D32" /> Staff Revenue Audit</h3>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.1rem', margin: 0 }}><Activity size={18} color="var(--secondary)" /> Staff Revenue Audit</h3>
           <InfoPanel
             title="Staff Revenue Audit"
             description="Activity feed showing each staff member's individual revenue contribution, number of clients served, working days logged, and total actions recorded in the system. Revenue is aggregated from transactions where the staff member is set as 'recordedBy', plus daily ops reports they created."
@@ -1140,13 +1140,13 @@ const BusinessAnalytics = () => {
           {employeeRates.length > 0 ? employeeRates.slice(0, 5).map((emp, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: emp.incomeGenerated > 0 ? '#2E7D32' : '#94a3b8' }}></div>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: emp.incomeGenerated > 0 ? 'var(--secondary)' : '#94a3b8' }}></div>
                 <div>
                   <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700 }}>{emp.name}</p>
                   <span style={{ fontSize: '0.65rem', color: '#999' }}>{emp.clientsServed} clients • {emp.workingDays} days • {emp.totalActions} actions</span>
                 </div>
               </div>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#2E7D32' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--secondary)' }}>
                 +{fmtAmt(emp.incomeGenerated || 0, currency)}
               </span>
             </div>
@@ -1158,7 +1158,7 @@ const BusinessAnalytics = () => {
 
       {/* Customer Intelligence Highlights */}
        <div className="admin-card no-print" style={{ 
-        background: '#1B5E20', 
+        background: 'var(--primary-dark)', 
         color: 'white', 
         borderRadius: '24px', 
         padding: '2rem', 
@@ -1191,7 +1191,7 @@ const BusinessAnalytics = () => {
         <div className="admin-card no-border shadow-sm">
           <div className="admin-card-header" style={{ padding: '1.5rem 2rem' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-               <Award size={20} color="#1B5E20" /> Attendance vs Income Correlation
+               <Award size={20} color="var(--primary-dark)" /> Attendance vs Income Correlation
             </h3>
             <InfoPanel
                title="Productivity Correlation"
@@ -1242,11 +1242,11 @@ const BusinessAnalytics = () => {
                          </div>
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                         <span style={{ fontSize: '0.95rem', fontWeight: 950, color: '#1B5E20' }}>{fmtAmt(Number(emp.incomePerDay) || 0, currency)}</span>
+                         <span style={{ fontSize: '0.95rem', fontWeight: 950, color: 'var(--primary-dark)' }}>{fmtAmt(Number(emp.incomePerDay) || 0, currency)}</span>
                          <div style={{ fontSize: '0.6rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Daily Yield</div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                         <div style={{ fontSize: '1.05rem', fontWeight: 950, color: '#32CD32' }}>{fmtAmt(emp.incomeGenerated || 0, currency)}</div>
+                         <div style={{ fontSize: '1.05rem', fontWeight: 950, color: 'var(--primary)' }}>{fmtAmt(emp.incomeGenerated || 0, currency)}</div>
                          <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>{((emp.incomeGenerated / (summary.totalRevenue || 1)) * 100).toFixed(1)}% Core Contribution</div>
                       </td>
                     </tr>
@@ -1273,8 +1273,8 @@ const BusinessAnalytics = () => {
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 900, color: '#1b5e20', fontSize: '1.1rem' }}>{fmtAmt(client.total, currency)}</div>
-                    <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: '6px', background: '#32CD32', color: 'white', textTransform: 'uppercase', fontWeight: 900 }}>Top Tier</span>
+                    <div style={{ fontWeight: 900, color: 'var(--primary-dark)', fontSize: '1.1rem' }}>{fmtAmt(client.total, currency)}</div>
+                    <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: '6px', background: 'var(--primary)', color: 'white', textTransform: 'uppercase', fontWeight: 900 }}>Top Tier</span>
                   </div>
                </div>
              ))}
@@ -1314,7 +1314,7 @@ const BusinessAnalytics = () => {
                     <tbody>
                        {specialClients.map((client, i) => (
                           <tr key={i}>
-                             <td style={{ padding: '12px', background: '#f8fafc', borderBottomLeftRadius: '10px', borderTopLeftRadius: '10px', fontWeight: 900, fontSize: '0.75rem', color: '#1B5E20' }}>
+                             <td style={{ padding: '12px', background: '#f8fafc', borderBottomLeftRadius: '10px', borderTopLeftRadius: '10px', fontWeight: 900, fontSize: '0.75rem', color: 'var(--primary-dark)' }}>
                                 #{i + 1}
                              </td>
                              <td style={{ background: '#f8fafc', padding: '12px' }}>
@@ -1322,8 +1322,8 @@ const BusinessAnalytics = () => {
                                 <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Member since 2024 • Last active {client.lastActive}</div>
                              </td>
                              <td style={{ background: '#f8fafc', padding: '12px', borderBottomRightRadius: '10px', borderTopRightRadius: '10px', textAlign: 'right' }}>
-                                <div style={{ fontWeight: 900, color: '#1B5E20', fontSize: '0.9rem' }}>{fmtAmt(client.total || 0, currency)}</div>
-                                <div style={{ fontSize: '0.55rem', fontWeight: 800, background: '#e8f5e9', color: '#1B5E20', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>PLATINUM TIER</div>
+                                <div style={{ fontWeight: 900, color: 'var(--primary-dark)', fontSize: '0.9rem' }}>{fmtAmt(client.total || 0, currency)}</div>
+                                <div style={{ fontSize: '0.55rem', fontWeight: 800, background: '#e8f5e9', color: 'var(--primary-dark)', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>PLATINUM TIER</div>
                              </td>
                           </tr>
                        ))}
@@ -1359,7 +1359,7 @@ const BusinessAnalytics = () => {
         .flex-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .h-400 { height: 400px; }
         .w-100 { width: 100%; }
-        .loading-spinner { width: 40px; height: 40px; border: 4px solid #f0f2f0; border-top-color: #32CD32; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid #f0f2f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
         @keyframes stroke-anim {

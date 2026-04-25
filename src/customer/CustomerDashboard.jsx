@@ -75,7 +75,7 @@ const CustomerDashboard = () => {
         alignItems: 'flex-end',
         pointerEvents: 'none'
       }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1B5E20', fontWeight: 900, fontSize: '1rem' }}>
+         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#32FC05', fontWeight: 900, fontSize: '1rem' }}>
             <Clock size={16} /> {formatTime(currentTime)}
          </div>
          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginTop: '2px' }}>
@@ -87,7 +87,7 @@ const CustomerDashboard = () => {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', background: 'white', padding: '1.5rem 2rem', borderRadius: '16px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
           <div>
-            <h1 style={{ fontSize: '1.5rem', margin: 0, color: '#1B5E20' }}>Hello, {user?.name || 'Valued Client'}</h1>
+            <h1 style={{ fontSize: '1.5rem', margin: 0, color: '#32FC05' }}>Hello, {user?.name || 'Valued Client'}</h1>
             <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Welcome to your personal DRAVANUA workspace.</p>
           </div>
           <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff4444', background: '#fff5f5', border: '1px solid #ffebeb', padding: '10px 16px', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}>
@@ -110,7 +110,7 @@ const CustomerDashboard = () => {
                  {bookings.map((b, i) => (
                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', border: '1px solid #f0f0f0', borderRadius: '16px' }}>
                       <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                         <div style={{ background: '#e8f5e9', color: '#1B5E20', padding: '12px', borderRadius: '12px' }}>
+                         <div style={{ background: '#e8f5e9', color: '#32FC05', padding: '12px', borderRadius: '12px' }}>
                             <Calendar size={20} />
                          </div>
                          <div>
@@ -120,7 +120,7 @@ const CustomerDashboard = () => {
                       </div>
                       <div style={{ textAlign: 'right' }}>
                          <p style={{ fontWeight: 800, color: '#32CD32', margin: 0 }}>${b.totalAmount || '0'}</p>
-                         <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: b.status === 'confirmed' ? '#e8f5e9' : '#fff9e6', color: b.status === 'confirmed' ? '#1B5E20' : '#856404', textTransform: 'uppercase', fontWeight: 800 }}>
+                         <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: b.status === 'confirmed' ? '#e8f5e9' : '#fff9e6', color: b.status === 'confirmed' ? '#32FC05' : '#856404', textTransform: 'uppercase', fontWeight: 800 }}>
                             {b.status}
                          </span>
                       </div>
@@ -140,7 +140,7 @@ const CustomerDashboard = () => {
              <div style={{ background: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                 <h3 style={{ fontSize: '1rem', marginBottom: '1.5rem' }}>Client Profile</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
-                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #32FC05, #32CD32)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                       <User size={24} />
                    </div>
                    <div>
@@ -154,7 +154,7 @@ const CustomerDashboard = () => {
                 </div>
              </div>
 
-             <div style={{ background: 'linear-gradient(135deg, #1B5E20, #0D3B0D)', color: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 8px 25px rgba(27, 94, 32, 0.2)' }}>
+             <div style={{ background: 'linear-gradient(135deg, #32FC05, #0D3B0D)', color: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 8px 25px rgba(27, 94, 32, 0.2)' }}>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                    <HelpCircle size={20} /> Need Assistance?
                 </h3>

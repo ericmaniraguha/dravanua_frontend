@@ -13,6 +13,7 @@ const translations = {
     contact: 'Contact',
     login: 'Login',
     signup: 'Signup',
+    references: 'References',
     bookService: 'Book a Service'
   },
   fr: {
@@ -23,6 +24,7 @@ const translations = {
     contact: 'Contact',
     login: 'Connexion',
     signup: "S'inscrire",
+    references: 'Références',
     bookService: 'Réserver'
   },
   sw: {
@@ -33,6 +35,7 @@ const translations = {
     contact: 'Mawasiliano',
     login: 'Ingia',
     signup: 'Jisajili',
+    references: 'Marejeleo',
     bookService: 'Weka Huduma'
   }
 };
@@ -58,6 +61,7 @@ const Navbar = () => {
     { name: t.about, path: '/about' },
     { name: t.services, path: '/services' },
     { name: t.gallery, path: '/gallery' },
+    { name: t.references, path: '/partners' },
     { name: t.contact, path: '/contact' },
   ];
 

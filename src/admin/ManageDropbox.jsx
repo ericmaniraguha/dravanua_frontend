@@ -16,6 +16,8 @@ import ContractGenerator from './Contractgenerator';
 
 const ManageDropbox = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
   // ── All vault categories (super_admin sees all) ────────────────────────────
   const serviceCategories = [
     // Dept 1 — Studio
@@ -23,7 +25,7 @@ const ManageDropbox = () => {
       id: 'studio', 
       name: 'Studio Repository', 
       folderName: 'Studio',
-      deptIds: [1],          // which departments own this card
+      deptCodes: ['studio'],          // which departments own this card
       icon: Camera, 
       color: '#9C27B0', 
       bgColor: '#f3e5f5',
@@ -35,7 +37,7 @@ const ManageDropbox = () => {
       id: 'papeterie', 
       name: 'Papeterie / Stationary', 
       folderName: 'Papeterie / Stationary',
-      deptIds: [2],
+      deptCodes: ['papeterie'],
       icon: BookOpen, 
       color: '#3F51B5', 
       bgColor: '#e8eaf6',
@@ -47,7 +49,7 @@ const ManageDropbox = () => {
       id: 'flowers', 
       name: 'Flower Gifts', 
       folderName: 'Flower Gifts',
-      deptIds: [3],
+      deptCodes: ['flower_gifts'],
       icon: Flower2, 
       color: '#E91E63', 
       bgColor: '#fce4ec',
@@ -59,7 +61,7 @@ const ManageDropbox = () => {
       id: 'fashion', 
       name: 'Classic Fashion', 
       folderName: 'Classic Fashion',
-      deptIds: [4],
+      deptCodes: ['classic_fashion'],
       icon: Shirt, 
       color: '#FF5722', 
       bgColor: '#fbe9e7',
@@ -71,7 +73,7 @@ const ManageDropbox = () => {
       id: 'client_files', 
       name: 'Client Delivery Hub', 
       folderName: 'Client_Folders',
-      deptIds: [1, 2, 3, 4, 5],   // visible to everyone
+      deptCodes: ['studio', 'papeterie', 'flower_gifts', 'classic_fashion', 'marketing', 'operations_hub'],   // visible to most
       icon: Users, 
       color: '#00BCD4', 
       bgColor: '#e0f7fa',
@@ -83,7 +85,7 @@ const ManageDropbox = () => {
       id: 'booking',
       name: 'Booking / E-Service',
       folderName: 'Booking / E-Service',
-      deptIds: [1, 2, 3, 4, 5],
+      deptCodes: ['studio', 'papeterie', 'flower_gifts', 'classic_fashion', 'marketing', 'operations_hub'],
       icon: Calendar,
       color: '#009688',
       bgColor: '#e0f2f1',
@@ -95,7 +97,7 @@ const ManageDropbox = () => {
       id: 'reports', 
       name: 'Operational Reports', 
       folderName: 'Reports',
-      deptIds: [],               // empty = admin-only (super_admin / service_admin)
+      deptCodes: [],               // empty = privileged-only (super_admin / service_admin)
       icon: FileText, 
       color: '#4CAF50', 
       bgColor: '#e8f5e9',
@@ -106,7 +108,7 @@ const ManageDropbox = () => {
       id: 'brand', 
       name: 'Brand Assets', 
       folderName: 'Brand_Assets',
-      deptIds: [],
+      deptCodes: [],
       icon: Palette, 
       color: '#FF9800', 
       bgColor: '#fff3e0',
@@ -117,10 +119,9 @@ const ManageDropbox = () => {
       id: 'external', 
       name: 'External Resources', 
       folderName: 'External_Resources',
-      deptIds: [],
+      deptCodes: [],
       icon: ExternalLink, 
       color: '#607D8B', 
-      bgColor: '#eceff1',
       bgColor: '#eceff1',
       description: 'Vendor resources and shared public-facing assets',
       subfolders: ['Third-Party', 'Public Assets', 'Shared']
@@ -129,9 +130,9 @@ const ManageDropbox = () => {
       id: 'receipts', 
       name: 'Digital Vault & Receipts', 
       folderName: 'Receipts_Vault',
-      deptIds: [],
-      icon: ExternalLink, 
-      color: '#1B5E20', 
+      deptCodes: [],
+      icon: Shield, 
+      color: '#32FC05', 
       bgColor: '#e8f5e9',
       description: 'Secure receipts, invoices, and expense declaration module',
       subfolders: [],
@@ -163,6 +164,12 @@ const ManageDropbox = () => {
   const [dragOver, setDragOver] = useState(false);
   const [showContractGenerator, setShowContractGenerator] = useState(false);
   const [emailModal, setEmailModal] = useState({ isOpen: false, item: null, recipient: '' });
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Storage stats — expanded for new service IDs
   const [storageStats, setStorageStats] = useState({
@@ -181,24 +188,44 @@ const ManageDropbox = () => {
     }
   });
 
-  const { user, secureFetch } = useAuth();
-  const currentUser = user || { name: 'Admin User', email: 'admin@dravauna.com', role: 'user' };
+  const { secureFetch } = useAuth();
 
   // ── ROLE-BASED ACCESS CONTROL ──────────────────────────────────────────────
-  // super_admin → all vaults (including admin-only ones with deptIds: [])
-  // service_admin → all department vaults + shared, but NOT admin-only
-  // user (normal staff) → only their department's vault + shared cards
-  const isSuperAdmin   = currentUser.role === 'super_admin';
-  const isServiceAdmin = currentUser.role === 'service_admin';
+  const isSuperAdmin   = user?.role === 'super_admin';
+  const isServiceAdmin = user?.role === 'service_admin';
+  const userDeptCode   = user?.deptCode || null;
   const isPrivileged   = isSuperAdmin || isServiceAdmin;
-  const userDeptId     = Number(currentUser.departmentId) || null;
+
+  // Normal staff (role: 'user') can access if they are active and have a department
+  const canAccessVault = isPrivileged || (user?.isActive && userDeptCode);
+
+  if (!canAccessVault) {
+    return (
+      <div className="admin-page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', textAlign: 'center' }}>
+        <div style={{ background: '#fee2e2', padding: '2.5rem', borderRadius: '32px', border: '1px solid #fecaca', maxWidth: '450px' }}>
+          <Lock size={64} color="#dc2626" style={{ marginBottom: '1.5rem' }} />
+          <h2 style={{ color: '#991b1b', fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem' }}>Vault Restricted</h2>
+          <p style={{ color: '#7f1d1d', fontSize: '1rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+            The Digital Vault is restricted to active staff members. Please contact the head office if you require file archival access.
+          </p>
+          <button 
+            onClick={() => navigate('/admin/dashboard')} 
+            className="btn btn-primary"
+            style={{ padding: '0.75rem 2rem', borderRadius: '12px' }}
+          >
+            Return to Command Center
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const filteredServices = serviceCategories.filter(s => {
     let access = false;
     if (isSuperAdmin) access = true;
-    else if (s.deptIds.length === 0) access = isServiceAdmin;
+    else if (s.deptCodes.length === 0) access = isServiceAdmin;
     else if (isServiceAdmin) access = true;
-    else access = userDeptId !== null && s.deptIds.includes(userDeptId);
+    else access = userDeptCode !== null && s.deptCodes.includes(userDeptCode);
 
     if (access && searchTerm) {
        access = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.description.toLowerCase().includes(searchTerm.toLowerCase()) || s.folderName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -207,8 +234,14 @@ const ManageDropbox = () => {
   });
 
   // Dept label for the access banner
-  const deptLabels = { 1: 'Studio 📸', 2: 'Papeterie 📄', 3: 'Flower Gifts 💐', 4: 'Classic Fashion 💍', 5: 'Marketing 📢' };
-  const userDeptLabel = deptLabels[userDeptId] || 'General';
+  const deptLabels = { 
+    studio: 'Creative Studio 📸', 
+    papeterie: 'Papeterie 📄', 
+    flower_gifts: 'Flower Gifts 💐', 
+    classic_fashion: 'Classic Fashion 💍', 
+    marketing: 'Marketing 📢' 
+  };
+  const userDeptLabel = deptLabels[userDeptCode] || user?.department || 'General';
 
   // Toast
   const showToast = (message, type = 'success') => {
@@ -456,7 +489,7 @@ const ManageDropbox = () => {
   const fetchContents = useCallback(async (path = currentPath) => {
     setLoading(true);
     try {
-      const resp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/dropbox/list?path=${encodeURIComponent(path)}`);
+      const resp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/dropbox/list?path=${encodeURIComponent(path)}&start=${startDate}&end=${endDate}`);
       const result = await resp.json();
       if (result.success) {
         setFolders(result.folders || []);
@@ -477,7 +510,7 @@ const ManageDropbox = () => {
     if (activeService) {
       fetchContents(currentPath);
     }
-  }, [currentPath, activeService, fetchContents]);
+  }, [currentPath, activeService, fetchContents, startDate, endDate]);
 
   // Navigate to service
   const selectService = (service) => {
@@ -991,6 +1024,13 @@ const ManageDropbox = () => {
                 />
               </div>
 
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', padding: '4px 8px', borderRadius: '10px', border: '1px solid #e2e8f0', marginLeft: '0.5rem' }}>
+                <Calendar size={12} className="text-muted" />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.65rem', fontWeight: 600, color: '#334155', width: '85px' }} />
+                <span style={{ color: '#94a3b8', fontWeight: 900, fontSize: '0.65rem' }}>→</span>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.65rem', fontWeight: 600, color: '#334155', width: '85px' }} />
+              </div>
+
               <div className="view-toggle">
                 <button onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'active' : ''}>
                   <Grid size={18} />
@@ -1354,7 +1394,7 @@ const ManageDropbox = () => {
             boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', overflow: 'hidden'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+              background: 'linear-gradient(135deg, #32FC05, #2E7D32)',
               padding: '1.75rem', color: 'white', display: 'flex',
               justifyContent: 'space-between', alignItems: 'center'
             }}>
@@ -1375,7 +1415,7 @@ const ManageDropbox = () => {
               </p>
               
               <div className="form-group" style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 800, color: '#1B5E20', fontSize: '0.8rem', textTransform: 'uppercase' }}>Recipient Address *</label>
+                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 800, color: '#32FC05', fontSize: '0.8rem', textTransform: 'uppercase' }}>Recipient Address *</label>
                 <div style={{ position: 'relative' }}>
                   <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input 
@@ -1603,7 +1643,7 @@ const ManageDropbox = () => {
           border-radius: 14px; cursor: pointer; transition: all 0.2s;
         }
         .folder-card:hover { border-color: #0061FF; box-shadow: 0 8px 25px rgba(0,0,0,0.08); transform: translateY(-2px); }
-        .folder-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: linear-gradient(135deg, #1B5E20, #32CD32) !important; color: white !important; }
+        .folder-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: linear-gradient(135deg, #32FC05, #32CD32) !important; color: white !important; }
         .folder-details { flex: 1; min-width: 0; }
         .folder-name { display: block; font-weight: 800; font-size: 0.9rem; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .folder-meta { display: block; font-size: 0.7rem; color: #999; margin-top: 2px; }
@@ -1636,8 +1676,8 @@ const ManageDropbox = () => {
         .folder-row { cursor: pointer; }
         .folder-row:hover td { background: #e3f2fd; }
         .item-name { display: flex; align-items: center; gap: 12px; }
-        .item-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; background: linear-gradient(135deg, #1B5E20, #32CD32) !important; color: white !important; }
-        .item-icon.file { background: linear-gradient(135deg, #1B5E20, #32CD32) !important; color: white !important; }
+        .item-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; background: linear-gradient(135deg, #32FC05, #32CD32) !important; color: white !important; }
+        .item-icon.file { background: linear-gradient(135deg, #32FC05, #32CD32) !important; color: white !important; }
         .item-icon img { width: 100%; height: 100%; object-fit: cover; }
         .item-name .name { font-weight: 700; font-size: 0.85rem; color: var(--accent); }
         .item-name .meta { display: block; font-size: 0.7rem; color: #999; }

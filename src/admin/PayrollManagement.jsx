@@ -61,6 +61,12 @@ const PayrollManagement = () => {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear()
   });
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(1); // Start of month
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [showBalances, setShowBalances] = useState(true);
 
   // Summary Statistics
@@ -131,7 +137,7 @@ const PayrollManagement = () => {
     setLoadingPayroll(true);
     try {
       const res = await secureFetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/payroll/records?month=${period.month}&year=${period.year}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/payroll/records?start=${startDate}&end=${endDate}`
       );
       const data = await res.json();
       if (data.success) {
@@ -191,7 +197,7 @@ const PayrollManagement = () => {
     } else {
       fetchPayrollRecords();
     }
-  }, [activeTab, period]);
+  }, [activeTab, startDate, endDate]);
 
   // Update Handlers
   const handleUpdateStructure = async (e) => {
@@ -345,7 +351,7 @@ const PayrollManagement = () => {
           <span class="metric-lbl">TOTAL DEDUCTIONS</span>
         </div>
         <div class="metric-card">
-          <span class="metric-val" style="color:#1B5E20;">${formatNum(summaryData.totalNetPayout)} RWF</span>
+          <span class="metric-val" style="color:#32FC05;">${formatNum(summaryData.totalNetPayout)} RWF</span>
           <span class="metric-lbl">NET SALARY DISBURSEMENT</span>
         </div>
         <div class="metric-card">
@@ -480,7 +486,7 @@ const PayrollManagement = () => {
       <Header title="Payroll & Personnel Management" subtitle="Compensation processing, salary structures, and advance management." />
 
       {/* Treasury Summary Card */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>GROSS PAYOUT</div>
@@ -528,7 +534,7 @@ const PayrollManagement = () => {
                     alignItems: 'center',
                     gap: '8px',
                     background: activeTab === tab.id ? 'white' : 'transparent',
-                    color: activeTab === tab.id ? '#1B5E20' : '#64748b',
+                    color: activeTab === tab.id ? '#32FC05' : '#64748b',
                     boxShadow: activeTab === tab.id ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
@@ -542,22 +548,21 @@ const PayrollManagement = () => {
           {/* Action Toolbar */}
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             {activeTab === 'processing' && (
-              <div style={{ display: 'flex', gap: '8px', padding: '5px 12px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <CalendarIcon size={16} color="#1B5E20" />
-                <select
-                  value={period.month}
-                  onChange={e => setPeriod({ ...period, month: parseInt(e.target.value) })}
-                  style={{ border: 'none', background: 'transparent', fontWeight: 800, fontSize: '0.8rem', outline: 'none', color: '#1B5E20', cursor: 'pointer' }}
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('default', { month: 'long' })}</option>)}
-                </select>
-                <select
-                  value={period.year}
-                  onChange={e => setPeriod({ ...period, year: parseInt(e.target.value) })}
-                  style={{ border: 'none', background: 'transparent', fontWeight: 800, fontSize: '0.8rem', outline: 'none', color: '#1B5E20', cursor: 'pointer' }}
-                >
-                  {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', padding: '4px 8px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <Calendar size={14} className="text-muted" />
+                <input 
+                  type="date" 
+                  value={startDate} 
+                  onChange={e => setStartDate(e.target.value)} 
+                  style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+                />
+                <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+                <input 
+                  type="date" 
+                  value={endDate} 
+                  onChange={e => setEndDate(e.target.value)} 
+                  style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+                />
               </div>
             )}
 
@@ -604,7 +609,7 @@ const PayrollManagement = () => {
       {/* Processing Tab */}
       {activeTab === 'processing' && (
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
                 DRAVANUA STUDIO — PAYROLL PROCESSING {new Date().getFullYear()}
@@ -615,21 +620,21 @@ const PayrollManagement = () => {
             </div>
             <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
               <div>Period: {new Date(0, period.month - 1).toLocaleString('default', { month: 'long' })} {period.year}</div>
-              <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+              <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
             </div>
           </div>
 
           <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '950px' }}>
               <thead>
-                <tr style={{ background: '#1B5E20' }}>
+                <tr style={{ background: '#32FC05' }}>
                   {['STAFF NAME', 'STAFF CODE', 'BASE SALARY', 'ALLOWANCES', 'DEDUCTIONS', 'NET AMOUNT', 'ATTENDANCE', 'STATUS', 'ACTIONS'].map(h => (
                     <th key={h} style={{
                       padding: '10px 12px', color: 'white', fontWeight: 900,
                       fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                       textAlign: (h === 'ACTIONS' || h === 'STATUS' || h === 'NET AMOUNT') ? 'right' : 'left',
                       whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                      background: 'linear-gradient(180deg, #32FC05, #166534)'
                     }}>{h}</th>
                   ))}
                 </tr>
@@ -650,9 +655,9 @@ const PayrollManagement = () => {
                       <td style={{ padding: '12px', fontWeight: 900, color: '#0f172a' }}>{item.AdminUser?.name}</td>
                       <td style={{ padding: '12px', fontFamily: 'monospace', fontSize: '0.7rem', color: '#475569' }}>{item.AdminUser?.staffCode}</td>
                       <td style={{ padding: '12px', fontWeight: 700 }}>{formatValue(item.baseAmount)}</td>
-                      <td style={{ padding: '12px', fontWeight: 700, color: '#1B5E20' }}>+{formatValue(item.allowances)}</td>
+                      <td style={{ padding: '12px', fontWeight: 700, color: '#32FC05' }}>+{formatValue(item.allowances)}</td>
                       <td style={{ padding: '12px', fontWeight: 700, color: '#dc2626' }}>-{formatValue(item.deductions)}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#1B5E20', fontSize: '0.8rem' }}>{formatValue(item.netAmount)}</td>
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#32FC05', fontSize: '0.8rem' }}>{formatValue(item.netAmount)}</td>
                       <td style={{ padding: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: item.daysWorked > 0 ? '#32CD32' : '#cbd5e1' }}></div>
@@ -683,7 +688,7 @@ const PayrollManagement = () => {
                           {item.status === 'Pending' && (
                             <button
                               onClick={() => updateRecordStatus(item.id, 'Approved')}
-                              style={{ padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', color: '#1B5E20' }}
+                              style={{ padding: '4px 10px', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', color: '#32FC05' }}
                             >
                               Approve
                             </button>
@@ -691,7 +696,7 @@ const PayrollManagement = () => {
                           {item.status === 'Approved' && (
                             <button
                               onClick={() => updateRecordStatus(item.id, 'Paid')}
-                              style={{ padding: '4px 10px', background: '#1B5E20', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}
+                              style={{ padding: '4px 10px', background: '#32FC05', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}
                             >
                               Disburse
                             </button>
@@ -705,7 +710,7 @@ const PayrollManagement = () => {
                               });
                               setIsReminderModalOpen(true);
                             }}
-                            style={{ padding: '4px 6px', background: 'white', border: '1px solid #e2e8f0', color: '#1B5E20', borderRadius: '4px', cursor: 'pointer' }}
+                            style={{ padding: '4px 6px', background: 'white', border: '1px solid #e2e8f0', color: '#32FC05', borderRadius: '4px', cursor: 'pointer' }}
                           >
                             <Bell size={14} />
                           </button>
@@ -727,7 +732,7 @@ const PayrollManagement = () => {
             <h2 style={{ fontSize: '1rem', fontWeight: 900, color: '#1e293b' }}>Salary Advances Pool</h2>
             <button
               onClick={() => setIsAdvanceModalOpen(true)}
-              style={{ background: '#1B5E20', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}
+              style={{ background: '#32FC05', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer' }}
             >
               + New Advance
             </button>
@@ -735,7 +740,7 @@ const PayrollManagement = () => {
 
           <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem' }}>
-              <thead style={{ background: '#1B5E20' }}>
+              <thead style={{ background: '#32FC05' }}>
                 <tr>
                   {['STAFF NAME', 'AMOUNT', 'REASON', 'REQUEST DATE', 'STATUS', 'ACTIONS'].map(h => (
                     <th key={h} style={{
@@ -743,7 +748,7 @@ const PayrollManagement = () => {
                       fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                       textAlign: (h === 'ACTIONS' || h === 'AMOUNT') ? 'right' : 'left',
                       whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                      background: 'linear-gradient(180deg, #32FC05, #166534)'
                     }}>{h}</th>
                   ))}
                 </tr>
@@ -758,7 +763,7 @@ const PayrollManagement = () => {
                       background: idx % 2 === 0 ? 'white' : '#fafcfb'
                     }} className="hover-row">
                       <td style={{ padding: '12px', fontWeight: 900, color: '#0f172a' }}>{adv.AdminUser?.name}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#1B5E20' }}>{formatValue(adv.amount)}</td>
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#32FC05' }}>{formatValue(adv.amount)}</td>
                       <td style={{ padding: '12px', fontSize: '0.8rem', color: '#475569' }}>{adv.reason || '—'}</td>
                       <td style={{ padding: '12px', color: '#64748b', fontWeight: 600, fontSize: '0.7rem' }}>{new Date(adv.requestDate).toLocaleDateString()}</td>
                       <td style={{ padding: '12px' }}>
@@ -775,7 +780,7 @@ const PayrollManagement = () => {
                           {adv.status === 'Pending' && (
                             <button
                               onClick={() => updateAdvanceStatus(adv.id, 'Approved')}
-                              style={{ padding: '4px 10px', background: '#1B5E20', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}
+                              style={{ padding: '4px 10px', background: '#32FC05', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer' }}
                             >
                               Approve
                             </button>
@@ -789,7 +794,7 @@ const PayrollManagement = () => {
                               });
                               setIsReminderModalOpen(true);
                             }}
-                            style={{ padding: '4px 6px', background: 'white', border: '1px solid #e2e8f0', color: '#1B5E20', borderRadius: '4px', cursor: 'pointer' }}
+                            style={{ padding: '4px 6px', background: 'white', border: '1px solid #e2e8f0', color: '#32FC05', borderRadius: '4px', cursor: 'pointer' }}
                           >
                             <Bell size={14} />
                           </button>
@@ -827,7 +832,7 @@ const PayrollManagement = () => {
             {filteredStaff.map(s => (
               <div key={s.id} style={{ background: 'white', borderRadius: '20px', border: '1px solid #f1f5f9', padding: '1.5rem', transition: 'all 0.2s', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', color: '#1B5E20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f1f5f9', color: '#32FC05', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.1rem' }}>
                     {s.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
@@ -843,7 +848,7 @@ const PayrollManagement = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: '#f8fafc', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b' }}>Payment Cycle</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20' }}>{s.SalaryStructure?.paymentCycle || 'Not Set'}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#32FC05' }}>{s.SalaryStructure?.paymentCycle || 'Not Set'}</span>
                   </div>
                 </div>
 
@@ -875,7 +880,7 @@ const PayrollManagement = () => {
       {isStructureModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: '420px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #1B5E20 0%, #32CD32 100%)', color: 'white' }}>
+            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #32FC05 0%, #32CD32 100%)', color: 'white' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0 }}>Contract Config</h2>
                 <button onClick={() => setIsStructureModalOpen(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer' }}>
@@ -938,11 +943,11 @@ const PayrollManagement = () => {
                   type="date"
                   value={editFormData.effectiveDate}
                   onChange={e => setEditFormData({ ...editFormData, effectiveDate: e.target.value })}
-                  style={{ width: '100%', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800, color: '#1B5E20' }}
+                  style={{ width: '100%', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800, color: '#32FC05' }}
                 />
               </div>
 
-              <button type="submit" style={{ marginTop: '1rem', background: '#1B5E20', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <button type="submit" style={{ marginTop: '1rem', background: '#32FC05', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                 <Save size={18} /> Commit Structure
               </button>
             </form>
@@ -989,7 +994,7 @@ const PayrollManagement = () => {
                     required
                     value={advanceForm.requestDate}
                     onChange={e => setAdvanceForm({ ...advanceForm, requestDate: e.target.value })}
-                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', fontWeight: 800, color: '#1B5E20' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', fontWeight: 800, color: '#32FC05' }}
                   />
                 </div>
               </div>
@@ -1013,7 +1018,7 @@ const PayrollManagement = () => {
                   style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', minHeight: '80px', fontSize: '0.85rem' }}
                 ></textarea>
               </div>
-              <button type="submit" style={{ background: '#1B5E20', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <button type="submit" style={{ background: '#32FC05', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                 <CreditCard size={18} /> Submit Advance Request
               </button>
             </form>
@@ -1025,7 +1030,7 @@ const PayrollManagement = () => {
       {isReminderModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: '420px', borderRadius: '24px', overflow: 'hidden' }}>
-            <div style={{ padding: '1.25rem', background: '#1B5E20', color: 'white', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ padding: '1.25rem', background: '#32FC05', color: 'white', display: 'flex', justifyContent: 'space-between' }}>
               <h3 style={{ margin: 0, fontWeight: 900 }}>Set Payroll Reminder</h3>
               <button onClick={() => setIsReminderModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={20} /></button>
             </div>
@@ -1042,7 +1047,7 @@ const PayrollManagement = () => {
                   <input type="time" required value={reminderForm.reminderTime} onChange={e => setReminderForm({ ...reminderForm, reminderTime: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
                 </div>
               </div>
-              <button type="submit" style={{ background: '#1B5E20', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Set Reminder</button>
+              <button type="submit" style={{ background: '#32FC05', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer' }}>Set Reminder</button>
             </form>
           </div>
         </div>
@@ -1052,7 +1057,7 @@ const PayrollManagement = () => {
       {isDetailsModalOpen && selectedRecord && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: '400px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #1B5E20 0%, #32CD32 100%)', color: 'white' }}>
+            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #32FC05 0%, #32CD32 100%)', color: 'white' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0 }}>Payroll Details</h2>
                 <button onClick={() => setIsDetailsModalOpen(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer' }}>
@@ -1064,7 +1069,7 @@ const PayrollManagement = () => {
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Staff Name</div>
-                <div style={{ fontSize: '1rem', fontWeight: 900, color: '#1B5E20' }}>{selectedRecord.AdminUser?.name}</div>
+                <div style={{ fontSize: '1rem', fontWeight: 900, color: '#32FC05' }}>{selectedRecord.AdminUser?.name}</div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -1087,7 +1092,7 @@ const PayrollManagement = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>ALLOWANCES</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#1B5E20' }}>+{formatValue(selectedRecord.allowances)}</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#32FC05' }}>+{formatValue(selectedRecord.allowances)}</div>
                 </div>
               </div>
 
@@ -1098,7 +1103,7 @@ const PayrollManagement = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>NET AMOUNT</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 1000, color: '#1B5E20' }}>{formatValue(selectedRecord.netAmount)}</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 1000, color: '#32FC05' }}>{formatValue(selectedRecord.netAmount)}</div>
                 </div>
               </div>
 
@@ -1119,7 +1124,7 @@ const PayrollManagement = () => {
                 </div>
               </div>
 
-              <button onClick={() => setIsDetailsModalOpen(false)} style={{ background: '#1B5E20', color: 'white', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', marginTop: '1rem' }}>CLOSE</button>
+              <button onClick={() => setIsDetailsModalOpen(false)} style={{ background: '#32FC05', color: 'white', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', marginTop: '1rem' }}>CLOSE</button>
             </div>
           </div>
         </div>
@@ -1132,11 +1137,11 @@ const generateEmailHtml = (summary, records) => {
   const formatNum = (v) => Number(v || 0).toLocaleString();
   return `
     <div style="font-family: sans-serif; color: #1e293b; max-width: 600px;">
-      <h2 style="color: #1B5E20; border-bottom: 2px solid #1B5E20; padding-bottom: 10px;">Payroll Summary Report</h2>
+      <h2 style="color: #32FC05; border-bottom: 2px solid #32FC05; padding-bottom: 10px;">Payroll Summary Report</h2>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
         <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
           <div style="font-size: 12px; color: #64748b;">NET DISBURSEMENT</div>
-          <div style="font-size: 20px; font-weight: bold; color: #1B5E20;">${formatNum(summary.totalNetPayout)} RWF</div>
+          <div style="font-size: 20px; font-weight: bold; color: #32FC05;">${formatNum(summary.totalNetPayout)} RWF</div>
         </div>
         <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
           <div style="font-size: 12px; color: #64748b;">STAFF PROCESSED</div>
@@ -1145,7 +1150,7 @@ const generateEmailHtml = (summary, records) => {
       </div>
       <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
         <thead>
-          <tr style="background: #1B5E20; color: white;">
+          <tr style="background: #32FC05; color: white;">
             <th style="padding: 10px; text-align: left;">Staff</th>
             <th style="padding: 10px; text-align: right;">Net Amount</th>
             <th style="padding: 10px; text-align: right;">Status</th>

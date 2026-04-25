@@ -12,14 +12,24 @@ import { generateReport } from '../utils/generateReport';
 
 const DailyOperationsManagement = () => {
   const { secureFetch, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('operations'); // 'operations', 'schedule', 'tasks', 'reports'
+  const [activeTab, setActiveTab] = useState('operations'); // 'operations', 'schedule', 'tasks', 'reports', 'inventory', 'purchases'
   const [loading, setLoading] = useState(false);
   const [operations, setOperations] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7); // Default to last 7 days for operations
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [reports, setReports] = useState([]);
+  const [items, setItems] = useState([]);
   const [showBalances, setShowBalances] = useState(true);
+  const [inventory, setInventory] = useState([]);
+  const [movements, setMovements] = useState([]);
+  const [purchases, setPurchases] = useState([]);
 
   // Summary Statistics
   const [summaryData, setSummaryData] = useState({
@@ -38,10 +48,13 @@ const DailyOperationsManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [viewingItem, setViewingItem] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
   const [deptInputType, setDeptInputType] = useState('preset');
   const [operationForm, setOperationForm] = useState({
-    title: '',
+    title: `Daily Operations — ${new Date().toLocaleDateString('en-GB')}`,
     description: '',
     department: '',
     priority: 'Medium',
@@ -61,12 +74,29 @@ const DailyOperationsManagement = () => {
     category: 'General'
   });
 
+  const [reportForm, setReportForm] = useState({
+    service: '',
+    quantity: 1,
+    unitPrice: 0,
+    totalPrice: 0,
+    amountPaid: 0,
+    debt: 0,
+    paymentMethod: 'Cash',
+    paymentAccount: '',
+    notes: '',
+    unavailableItems: '',
+    isPaid: true,
+    contactPerson: user?.name || '',
+    telephone: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+
   // Fetch Functions
   const fetchOperations = async () => {
     setLoading(true);
     try {
       const res = await secureFetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/operations?date=${dateFilter}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/operations?start=${startDate}&end=${endDate}`
       );
       const data = await res.json();
       if (data.success) {
@@ -84,7 +114,7 @@ const DailyOperationsManagement = () => {
     setLoading(true);
     try {
       const res = await secureFetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/schedule?date=${dateFilter}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/schedule?start=${startDate}&end=${endDate}`
       );
       const data = await res.json();
       if (data.success) setSchedule(data.data);
@@ -98,13 +128,36 @@ const DailyOperationsManagement = () => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/tasks`);
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/tasks?start=${startDate}&end=${endDate}`);
       const data = await res.json();
       if (data.success) setTasks(data.data);
     } catch (err) {
       console.error('Tasks Fetch Error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/daily-reports?start=${startDate}&end=${endDate}`);
+      const data = await res.json();
+      if (data.success) setReports(data.data);
+    } catch (err) {
+      console.error('Reports Fetch Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchItems = async () => {
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/items`);
+      const data = await res.json();
+      if (data.success) setItems(data.data);
+    } catch (err) {
+      console.error('Items Fetch Error:', err);
     }
   };
 
@@ -123,11 +176,49 @@ const DailyOperationsManagement = () => {
     });
   };
 
+  const fetchInventory = async () => {
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/inventory/status`);
+      const data = await res.json();
+      if (data.success) setInventory(data.data);
+    } catch (err) { console.error('Inventory Fetch Error:', err); }
+  };
+
+  const fetchMovements = async () => {
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/inventory/movements?start=${startDate}&end=${endDate}`);
+      const data = await res.json();
+      if (data.success) setMovements(data.data);
+    } catch (err) { console.error('Movements Fetch Error:', err); }
+  };
+
+  const fetchPurchasesList = async () => {
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/purchases?start=${startDate}&end=${endDate}`);
+      const data = await res.json();
+      if (data.success) setPurchases(data.data);
+    } catch (err) { console.error('Purchases Fetch Error:', err); }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'operations') fetchOperations();
     else if (activeTab === 'schedule') fetchSchedule();
     else if (activeTab === 'tasks') fetchTasks();
-  }, [activeTab, dateFilter]);
+    else if (activeTab === 'reports') {
+      fetchReports();
+    }
+    else if (activeTab === 'inventory') {
+      fetchInventory();
+      fetchMovements();
+    }
+    else if (activeTab === 'purchases') {
+      fetchPurchasesList();
+    }
+  }, [activeTab, startDate, endDate]);
 
   // Operation Handlers
   const handleCreateOperation = async (e) => {
@@ -149,7 +240,7 @@ const DailyOperationsManagement = () => {
         setIsOperationModalOpen(false);
         setEditingItem(null);
         setOperationForm({
-          title: '', description: '', department: '', priority: 'Medium',
+          title: `Daily Operations — ${new Date().toLocaleDateString('en-GB')}`, description: '', department: '', priority: 'Medium',
           startTime: '', endTime: '', assignedTo: user?.name || '', status: 'Pending',
           date: new Date().toISOString().split('T')[0]
         });
@@ -210,11 +301,74 @@ const DailyOperationsManagement = () => {
     }
   };
 
+  const handleCreateReport = async (e) => {
+    e.preventDefault();
+    try {
+      const url = editingItem 
+        ? `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/daily-reports/${editingItem.id}`
+        : `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/daily-reports`;
+      const method = editingItem ? 'PUT' : 'POST';
+
+      const resp = await secureFetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reportForm)
+      });
+      if (resp.ok) {
+        setIsReportModalOpen(false);
+        setEditingItem(null);
+        setReportForm({
+          service: '', quantity: 1, unitPrice: 0, totalPrice: 0, amountPaid: 0, debt: 0,
+          paymentMethod: 'Cash', paymentAccount: '', notes: '', unavailableItems: '',
+          isPaid: true, contactPerson: user?.name || '', telephone: '', date: new Date().toISOString().split('T')[0]
+        });
+        fetchReports();
+      }
+    } catch (err) {
+      alert('Failed to save report');
+    }
+  };
+
+  const [inventoryForm, setInventoryForm] = useState({ itemId: '', type: 'IN', quantity: 1, reason: 'Stock In' });
+  const handleInventoryAdjust = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/inventory/adjust`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inventoryForm)
+      });
+      if (res.ok) {
+        setIsInventoryModalOpen(false);
+        fetchInventory();
+        fetchMovements();
+      }
+    } catch (err) { alert('Adjustment failed'); }
+  };
+
+  const [purchaseForm, setPurchaseForm] = useState({ description: '', quantity: 1, unitPrice: 0, totalPrice: 0, paymentMethod: 'Cash', department: 'Logistics', date: new Date().toISOString().split('T')[0] });
+  const handleCreatePurchase = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/purchases`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(purchaseForm)
+      });
+      if (res.ok) {
+        setIsPurchaseModalOpen(false);
+        fetchPurchasesList();
+        fetchInventory(); // Purchase might trigger stock in
+      }
+    } catch (err) { alert('Purchase recording failed'); }
+  };
+
   const openOperationModal = () => {
     setDeptInputType('preset');
     setEditingItem(null);
     setOperationForm({
-      title: '', description: '', department: '', priority: 'Medium',
+      title: `Daily Operations — ${new Date().toLocaleDateString('en-GB')}`,
+      description: '', department: '', priority: 'Medium',
       startTime: '', endTime: '', assignedTo: user?.name || '', status: 'Pending',
       date: new Date().toISOString().split('T')[0]
     });
@@ -321,11 +475,11 @@ const DailyOperationsManagement = () => {
     const bodyHtml = `
       <div style="margin-bottom: 20px;">
         <h2>Daily Operations Overview</h2>
-        <p><strong>Date:</strong> ${dateFilter}</p>
+        <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
       </div>
       
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <tr style="background: #1B5E20; color: white;">
+        <tr style="background: var(--primary-dark); color: white;">
           <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Operation</th>
           <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Department</th>
           <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Time</th>
@@ -380,7 +534,7 @@ const DailyOperationsManagement = () => {
     return (
       <div className="admin-page center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#1B5E20' }} />
+          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: 'var(--primary-dark)' }} />
           <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b' }}>Loading daily operations...</p>
         </div>
       </div>
@@ -395,8 +549,8 @@ const DailyOperationsManagement = () => {
       />
 
       {/* Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '1rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+        <div className="summary-grid" style={{ display: 'grid', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>TODAY'S OPERATIONS</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{summaryData.totalOperations}</div>
@@ -425,13 +579,13 @@ const DailyOperationsManagement = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="admin-card" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', gap: '2rem', borderBottom: '1px solid #e2e8f0' }}>
+      <div className="admin-card tab-nav" style={{ padding: '1.5rem', marginBottom: '2rem', display: 'flex', gap: '2rem', borderBottom: '1px solid #e2e8f0', overflowX: 'auto' }}>
         <button
           onClick={() => setActiveTab('operations')}
           style={{
-            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'operations' ? '#1B5E20' : '#94a3b8',
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'operations' ? 'var(--primary-dark)' : '#94a3b8',
             background: 'none', border: 'none', cursor: 'pointer',
-            borderBottom: activeTab === 'operations' ? '3px solid #1B5E20' : 'none'
+            borderBottom: activeTab === 'operations' ? '3px solid var(--primary-dark)' : 'none'
           }}
         >
           <Activity size={18} style={{ display: 'inline', marginRight: '6px' }} /> Daily Operations
@@ -439,9 +593,9 @@ const DailyOperationsManagement = () => {
         <button
           onClick={() => setActiveTab('schedule')}
           style={{
-            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'schedule' ? '#1B5E20' : '#94a3b8',
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'schedule' ? 'var(--primary-dark)' : '#94a3b8',
             background: 'none', border: 'none', cursor: 'pointer',
-            borderBottom: activeTab === 'schedule' ? '3px solid #1B5E20' : 'none'
+            borderBottom: activeTab === 'schedule' ? '3px solid var(--primary-dark)' : 'none'
           }}
         >
           <Calendar size={18} style={{ display: 'inline', marginRight: '6px' }} /> Schedule
@@ -449,19 +603,49 @@ const DailyOperationsManagement = () => {
         <button
           onClick={() => setActiveTab('tasks')}
           style={{
-            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'tasks' ? '#1B5E20' : '#94a3b8',
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'tasks' ? 'var(--primary-dark)' : '#94a3b8',
             background: 'none', border: 'none', cursor: 'pointer',
-            borderBottom: activeTab === 'tasks' ? '3px solid #1B5E20' : 'none'
+            borderBottom: activeTab === 'tasks' ? '3px solid var(--primary-dark)' : 'none'
           }}
         >
           <CheckCircle size={18} style={{ display: 'inline', marginRight: '6px' }} /> Tasks
+        </button>
+        <button
+          onClick={() => setActiveTab('reports')}
+          style={{
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'reports' ? 'var(--primary-dark)' : '#94a3b8',
+            background: 'none', border: 'none', cursor: 'pointer',
+            borderBottom: activeTab === 'reports' ? '3px solid var(--primary-dark)' : 'none'
+          }}
+        >
+          <BarChart3 size={18} style={{ display: 'inline', marginRight: '6px' }} /> Sales & Reports
+        </button>
+        <button
+          onClick={() => setActiveTab('inventory')}
+          style={{
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'inventory' ? 'var(--primary-dark)' : '#94a3b8',
+            background: 'none', border: 'none', cursor: 'pointer',
+            borderBottom: activeTab === 'inventory' ? '3px solid var(--primary-dark)' : 'none'
+          }}
+        >
+          <Zap size={18} style={{ display: 'inline', marginRight: '6px' }} /> Inventory
+        </button>
+        <button
+          onClick={() => setActiveTab('purchases')}
+          style={{
+            padding: '10px 20px', fontSize: '0.9rem', fontWeight: 800, color: activeTab === 'purchases' ? 'var(--primary-dark)' : '#94a3b8',
+            background: 'none', border: 'none', cursor: 'pointer',
+            borderBottom: activeTab === 'purchases' ? '3px solid var(--primary-dark)' : 'none'
+          }}
+        >
+          <Briefcase size={18} style={{ display: 'inline', marginRight: '6px' }} /> Purchases
         </button>
       </div>
 
       {/* Toolbar */}
       <div className="admin-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1, flexWrap: 'wrap' }}>
             <div className="admin-search-wrapper" style={{ width: '280px', height: '44px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
               <Search size={16} color="#94a3b8" />
               <input
@@ -473,12 +657,22 @@ const DailyOperationsManagement = () => {
               />
             </div>
 
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              style={{ padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', padding: '4px 8px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <Calendar size={14} className="text-muted" />
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={e => setStartDate(e.target.value)} 
+                style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+              />
+              <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={e => setEndDate(e.target.value)} 
+                style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -494,16 +688,22 @@ const DailyOperationsManagement = () => {
                   Priority: o.priority,
                   Status: o.status
                 }))
-              }], `Operations_Audit_${dateFilter}`)}
+              }], `Operations_Audit_${startDate}_to_${endDate}`)}
               moduleCode="DOP"
             />
             
             <button
               className="btn btn-primary"
-              onClick={() => activeTab === 'tasks' ? setIsTaskModalOpen(true) : openOperationModal()}
+              onClick={() => {
+                if (activeTab === 'tasks') setIsTaskModalOpen(true);
+                else if (activeTab === 'reports') { setEditingItem(null); setReportForm({...reportForm, date: endDate}); setIsReportModalOpen(true); }
+                else if (activeTab === 'inventory') { setIsInventoryModalOpen(true); }
+                else if (activeTab === 'purchases') { setIsPurchaseModalOpen(true); }
+                else openOperationModal();
+              }}
               style={{ height: '44px', padding: '0 20px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <Plus size={18} /> Add {activeTab === 'tasks' ? 'Task' : 'Operation'}
+              <Plus size={18} /> Add {activeTab === 'tasks' ? 'Task' : (activeTab === 'reports' ? 'Report' : 'Operation')}
             </button>
           </div>
         </div>
@@ -512,28 +712,28 @@ const DailyOperationsManagement = () => {
       {/* Daily Operations Table */}
       {activeTab === 'operations' && (
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>DRAVANUA HUB — DAILY OPERATIONS</div>
               <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '0.06em' }}>REAL-TIME OPERATIONAL TRACKING · {filteredOperations.length} ACTIVE OPERATIONS</div>
             </div>
             <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
               <div>Generated: {new Date().toLocaleDateString()}</div>
-              <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+              <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
             </div>
           </div>
 
           <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1000px' }}>
               <thead>
-                <tr style={{ background: '#1B5E20' }}>
+                <tr style={{ background: 'var(--primary-dark)' }}>
                   {['OPERATION', 'DEPARTMENT', 'TIME SLOT', 'ASSIGNED TO', 'PRIORITY', 'STATUS', 'ACTIONS'].map(h => (
                     <th key={h} style={{
                       padding: '10px 12px', color: 'white', fontWeight: 900,
                       fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                       textAlign: h === 'ACTIONS' ? 'center' : 'left',
                       whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                      background: 'linear-gradient(180deg, var(--primary-dark), #166534)'
                     }}>{h}</th>
                   ))}
                 </tr>
@@ -557,8 +757,8 @@ const DailyOperationsManagement = () => {
                         </span>
                       </td>
                       <td style={{ padding: '12px' }}>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20' }}>
-                          {op.date || dateFilter}
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
+                          {op.date || endDate}
                         </div>
                         <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b', marginTop: '2px' }}>
                           {op.startTime} - {op.endTime}
@@ -582,7 +782,7 @@ const DailyOperationsManagement = () => {
                           <button
                             onClick={() => handleEditOperation(op)}
                             title="Edit"
-                            style={{ padding: '6px 8px', borderRadius: '6px', background: '#f8fafc', color: '#1B5E20', border: '1px solid #ddd', cursor: 'pointer' }}
+                            style={{ padding: '6px 8px', borderRadius: '6px', background: '#f8fafc', color: 'var(--primary-dark)', border: '1px solid #ddd', cursor: 'pointer' }}
                           >
                             <Edit size={14} />
                           </button>
@@ -630,7 +830,7 @@ const DailyOperationsManagement = () => {
       {/* Tasks Table */}
       {activeTab === 'tasks' && (
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>TASK MANAGEMENT</div>
               <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '0.06em' }}>STAFF TASK ASSIGNMENTS · {filteredTasks.length} ACTIVE TASKS</div>
@@ -640,13 +840,13 @@ const DailyOperationsManagement = () => {
           <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '900px' }}>
               <thead>
-                <tr style={{ background: '#1B5E20' }}>
+                <tr style={{ background: 'var(--primary-dark)' }}>
                   {['TASK', 'ASSIGNED TO', 'CATEGORY', 'DUE DATE', 'PRIORITY', 'ACTIONS'].map(h => (
                     <th key={h} style={{
                       padding: '10px 12px', color: 'white', fontWeight: 900,
                       fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                       textAlign: h === 'ACTIONS' ? 'center' : 'left',
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                      background: 'linear-gradient(180deg, var(--primary-dark), #166534)'
                     }}>{h}</th>
                   ))}
                 </tr>
@@ -671,7 +871,7 @@ const DailyOperationsManagement = () => {
                           {task.category}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20' }}>
+                      <td style={{ padding: '12px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
                         {new Date(task.dueDate).toLocaleDateString()}
                       </td>
                       <td style={{ padding: '12px' }}>
@@ -684,7 +884,7 @@ const DailyOperationsManagement = () => {
                           <button
                             onClick={() => handleEditTask(task)}
                             title="Edit"
-                            style={{ padding: '6px 8px', borderRadius: '6px', background: '#f8fafc', color: '#1B5E20', border: '1px solid #ddd', cursor: 'pointer' }}
+                            style={{ padding: '6px 8px', borderRadius: '6px', background: '#f8fafc', color: 'var(--primary-dark)', border: '1px solid #ddd', cursor: 'pointer' }}
                           >
                             <Edit size={14} />
                           </button>
@@ -723,8 +923,8 @@ const DailyOperationsManagement = () => {
       {/* Add Operation Modal */}
       {isOperationModalOpen && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="admin-modal" style={{ maxWidth: '600px', width: '90%', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Briefcase size={22} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{editingItem ? 'Edit Operation' : 'Add Daily Operation'}</h3>
@@ -736,12 +936,25 @@ const DailyOperationsManagement = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Operation Title *</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>Operation Title *</label>
+                      <select 
+                        onChange={(e) => {
+                          if (!e.target.value) return;
+                          setOperationForm({...operationForm, title: e.target.value});
+                        }}
+                        style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e2e8f0', background: '#f8fafc', fontWeight: 700, color: 'var(--primary-dark)', outline: 'none' }}
+                      >
+                        <option value="">Apply Registry Item...</option>
+                        {items.map(i => <option key={i.id} value={i.name}>{i.name}</option>)}
+                      </select>
+                    </div>
                     <input
                       type="text"
                       value={operationForm.title}
                       onChange={(e) => setOperationForm({...operationForm, title: e.target.value})}
                       required
+                      placeholder="e.g. Studio Session / Printing Order"
                       style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
                     />
                   </div>
@@ -777,7 +990,7 @@ const DailyOperationsManagement = () => {
                             key={type} type="button" onClick={() => setDeptInputType(type)}
                             style={{
                               padding: '2px 8px', fontSize: '0.6rem', border: 'none', borderRadius: '4px',
-                              background: deptInputType === type ? '#1B5E20' : 'transparent',
+                              background: deptInputType === type ? 'var(--primary-dark)' : 'transparent',
                               color: deptInputType === type ? 'white' : '#64748b',
                               cursor: 'pointer', fontWeight: 800, textTransform: 'uppercase'
                             }}
@@ -872,8 +1085,8 @@ const DailyOperationsManagement = () => {
       {/* Add Task Modal */}
       {isTaskModalOpen && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="admin-modal" style={{ maxWidth: '600px', width: '90%', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <CheckCircle size={22} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{editingItem ? 'Update Task' : 'Create New Task'}</h3>
@@ -972,8 +1185,8 @@ const DailyOperationsManagement = () => {
       {/* View Details Modal */}
       {isViewModalOpen && viewingItem && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal" style={{ maxWidth: '500px', borderRadius: '24px', overflow: 'hidden' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="admin-modal" style={{ maxWidth: '500px', width: '90%', borderRadius: '24px', overflow: 'hidden' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Info size={22} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>Information Details</h3>
@@ -1021,7 +1234,7 @@ const DailyOperationsManagement = () => {
 
               <button 
                 onClick={() => setIsViewModalOpen(false)}
-                style={{ width: '100%', marginTop: '2rem', height: '44px', background: '#1B5E20', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}
+                style={{ width: '100%', marginTop: '2rem', height: '44px', background: 'var(--primary-dark)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}
               >
                 Close Details
               </button>
@@ -1030,10 +1243,456 @@ const DailyOperationsManagement = () => {
         </div>
       )}
 
+      {/* Daily Reports Table */}
+      {activeTab === 'reports' && (
+        <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
+          <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), #0D3B0D)', padding: '12px 20px', color: 'white', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ fontWeight: 900, fontSize: '0.9rem' }}>DAILY SESSION INCOME & REPORTING</div>
+            <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>Generated: {new Date().toLocaleDateString()}</div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>SERVICE / ITEM</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>QTY</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>TOTAL VALUE</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>PAID</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>DEBT</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>STATUS</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.length === 0 ? (
+                  <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No reports recorded for this session.</td></tr>
+                ) : reports.map(r => (
+                  <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ fontWeight: 800 }}>{r.service}</div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Person: {r.contactPerson || 'Walk-in'}</div>
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700 }}>x{r.quantity}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900 }}>{parseFloat(r.totalPrice).toLocaleString()} RWF</td>
+                    <td style={{ padding: '12px', textAlign: 'right', color: 'var(--primary-dark)', fontWeight: 800 }}>{parseFloat(r.amountPaid).toLocaleString()}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', color: '#dc2626', fontWeight: 800 }}>{parseFloat(r.debt).toLocaleString()}</td>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <span style={{ padding: '3px 8px', borderRadius: '4px', background: r.isPaid ? '#dcfce7' : '#fee2e2', color: r.isPaid ? '#166534' : '#dc2626', fontSize: '0.6rem', fontWeight: 800 }}>
+                        {r.isPaid ? 'PAID' : 'DEBT'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
+                        <button onClick={() => { setEditingItem(r); setReportForm(r); setIsReportModalOpen(true); }} className="btn-icon"><Edit size={14} /></button>
+                        <button onClick={() => handleDelete(r.id, 'daily-report')} className="btn-icon" style={{ color: '#dc2626' }}><Trash2 size={14} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Inventory Table */}
+      {activeTab === 'inventory' && (
+        <div className="inventory-grid" style={{ display: 'grid', gap: '2rem', marginBottom: '2rem' }}>
+          <div style={{ border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', overflow: 'hidden' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', color: 'white', fontWeight: 900 }}>CURRENT STOCK LEVELS</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>ITEM / PRODUCT</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>STOCK</th>
+                  <th style={{ padding: '12px', textAlign: 'center' }}>STATUS</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>VALUATION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inventory.map(item => {
+                  const isLow = parseFloat(item.currentStock) <= parseFloat(item.minStock);
+                  const isOut = parseFloat(item.currentStock) <= 0;
+                  return (
+                    <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '12px' }}>
+                        <div style={{ fontWeight: 800 }}>{item.name}</div>
+                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>{item.type}</div>
+                      </td>
+                      <td style={{ padding: '12px', textAlign: 'center', fontWeight: 1000, fontSize: '0.9rem' }}>
+                        {parseFloat(item.currentStock).toLocaleString()}
+                      </td>
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <span style={{ 
+                          padding: '3px 8px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800,
+                          background: isOut ? '#fee2e2' : (isLow ? '#fef3c7' : '#dcfce7'),
+                          color: isOut ? '#dc2626' : (isLow ? '#d97706' : '#166534')
+                        }}>
+                          {isOut ? 'OUT OF STOCK' : (isLow ? 'LOW STOCK' : 'IN STOCK')}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800 }}>
+                        {parseFloat(item.price).toLocaleString()} RWF
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', overflow: 'hidden' }}>
+            <div style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', padding: '12px 20px', color: 'white', fontWeight: 900 }}>MOVEMENT HISTORY</div>
+            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem' }}>
+                <tbody>
+                  {movements.map(m => (
+                    <tr key={m.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '10px' }}>
+                        <div style={{ fontWeight: 800 }}>{m.Item?.name}</div>
+                        <div style={{ fontSize: '0.6rem', color: '#64748b' }}>{new Date(m.createdAt).toLocaleString()}</div>
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'right' }}>
+                        <span style={{ fontWeight: 1000, color: m.type === 'IN' ? '#166534' : '#dc2626' }}>
+                          {m.type === 'IN' ? '+' : '-'}{m.quantity}
+                        </span>
+                        <div style={{ fontSize: '0.6rem', color: '#94a3b8' }}>{m.reason}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Purchases Table */}
+      {activeTab === 'purchases' && (
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', overflow: 'hidden', marginBottom: '2rem' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', color: 'white', fontWeight: 900 }}>STOCK & RAW MATERIAL PURCHASES</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem' }}>
+            <thead>
+              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <th style={{ padding: '12px', textAlign: 'left' }}>DESCRIPTION</th>
+                <th style={{ padding: '12px', textAlign: 'center' }}>QTY</th>
+                <th style={{ padding: '12px', textAlign: 'right' }}>UNIT PRICE</th>
+                <th style={{ padding: '12px', textAlign: 'right' }}>TOTAL COST</th>
+                <th style={{ padding: '12px', textAlign: 'center' }}>ACCOUNT</th>
+                <th style={{ padding: '12px', textAlign: 'right' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {purchases.length === 0 ? (
+                <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No purchase records found.</td></tr>
+              ) : purchases.map(p => (
+                <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ fontWeight: 800 }}>{p.description}</div>
+                    <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Date: {p.date} • Dept: {p.department}</div>
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700 }}>x{p.quantity}</td>
+                  <td style={{ padding: '12px', textAlign: 'right' }}>{parseFloat(p.unitPrice).toLocaleString()}</td>
+                  <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#dc2626' }}>{parseFloat(p.totalPrice).toLocaleString()} RWF</td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#f1f5f9', color: '#475569', fontSize: '0.6rem', fontWeight: 800 }}>
+                      {p.paymentAccount || p.paymentMethod}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                    <button onClick={() => handleDelete(p.id, 'purchase')} className="btn-icon" style={{ color: '#dc2626' }}><Trash2 size={14} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Add Report Modal */}
+      {isReportModalOpen && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal" style={{ maxWidth: '650px', borderRadius: '24px', overflow: 'hidden' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <TrendingUp size={22} />
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{editingItem ? 'Update Operational Report' : 'New Operational Entry'}</h3>
+              </div>
+              <button onClick={() => setIsReportModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.5rem' }}>&times;</button>
+            </div>
+
+            <form onSubmit={handleCreateReport} style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Item / Service *</label>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        list="registryItems"
+                        value={reportForm.service}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const selected = items.find(i => i.name === val);
+                          setReportForm({
+                            ...reportForm, 
+                            service: val, 
+                            unitPrice: selected ? selected.price : reportForm.unitPrice,
+                            totalPrice: (selected ? selected.price : reportForm.unitPrice) * reportForm.quantity,
+                            debt: (selected ? selected.price : reportForm.unitPrice) * reportForm.quantity - reportForm.amountPaid
+                          });
+                        }}
+                        required
+                        className="form-input"
+                        placeholder="Select from registry or type name..."
+                      />
+                      <datalist id="registryItems">
+                        {items.map(i => <option key={i.id} value={i.name}>{parseFloat(i.price).toLocaleString()} RWF</option>)}
+                      </datalist>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Unit Price</label>
+                      <input 
+                        type="number" 
+                        value={reportForm.unitPrice}
+                        onChange={(e) => {
+                          const up = parseFloat(e.target.value) || 0;
+                          setReportForm({
+                            ...reportForm, 
+                            unitPrice: up, 
+                            totalPrice: up * reportForm.quantity,
+                            debt: up * reportForm.quantity - reportForm.amountPaid
+                          });
+                        }}
+                        className="form-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Quantity</label>
+                      <input 
+                        type="number" 
+                        min="1"
+                        value={reportForm.quantity}
+                        onChange={(e) => {
+                          const q = parseInt(e.target.value) || 0;
+                          setReportForm({
+                            ...reportForm, 
+                            quantity: q, 
+                            totalPrice: q * reportForm.unitPrice,
+                            debt: q * reportForm.unitPrice - reportForm.amountPaid
+                          });
+                        }}
+                        className="form-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Amt Paid</label>
+                      <input 
+                        type="number" 
+                        value={reportForm.amountPaid}
+                        onChange={(e) => {
+                          const paid = parseFloat(e.target.value) || 0;
+                          setReportForm({
+                            ...reportForm, 
+                            amountPaid: paid, 
+                            debt: reportForm.totalPrice - paid,
+                            isPaid: paid >= reportForm.totalPrice
+                          });
+                        }}
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Notes</label>
+                    <textarea 
+                      value={reportForm.notes} 
+                      onChange={(e) => setReportForm({...reportForm, notes: e.target.value})}
+                      className="form-input"
+                      style={{ height: '60px', resize: 'none' }}
+                      placeholder="Session specific notes..."
+                    />
+                  </div>
+
+                  <div style={{ background: '#fff1f2', padding: '12px', borderRadius: '12px', border: '1px dashed #fecaca' }}>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#dc2626', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>
+                      <AlertCircle size={12} style={{ display: 'inline', marginRight: '4px' }} /> Unavailable Items Reported
+                    </label>
+                    <textarea 
+                      value={reportForm.unavailableItems}
+                      onChange={(e) => setReportForm({...reportForm, unavailableItems: e.target.value})}
+                      className="form-input"
+                      style={{ height: '45px', border: '1px solid #fecaca', fontSize: '0.75rem' }}
+                      placeholder="List equipment or stock that was missing today..."
+                    />
+                  </div>
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ textAlign: 'center', padding: '1rem', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#94a3b8' }}>TOTAL DUE</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 1000, color: 'var(--primary-dark)' }}>{reportForm.totalPrice.toLocaleString()} <span style={{fontSize:'0.8rem'}}>RWF</span></div>
+                  </div>
+                  
+                  <div>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Contact Person</label>
+                    <input type="text" value={reportForm.contactPerson} onChange={e => setReportForm({...reportForm, contactPerson: e.target.value})} className="form-input" />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Telephone No.</label>
+                    <input type="text" value={reportForm.telephone} onChange={e => setReportForm({...reportForm, telephone: e.target.value})} className="form-input" />
+                  </div>
+                  <div>
+                     <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>Payment Method</label>
+                     <select value={reportForm.paymentMethod} onChange={e => setReportForm({...reportForm, paymentMethod: e.target.value})} className="form-input">
+                       <option value="Cash">Cash</option>
+                       <option value="MoMo">Mobile Money</option>
+                       <option value="Bank">Bank Transfer</option>
+                     </select>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+                <button type="button" onClick={() => setIsReportModalOpen(false)} className="btn btn-outline" style={{ padding: '12px 24px', borderRadius: '12px' }}>CANCEL</button>
+                <button type="submit" className="btn btn-primary" style={{ padding: '12px 30px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))' }}>
+                  {editingItem ? 'UPDATE REPORT' : 'SUBMIT DAILY REPORT'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Inventory Adjustment Modal */}
+      {isInventoryModalOpen && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal" style={{ maxWidth: '400px', borderRadius: '20px' }}>
+            <div style={{ padding: '1.25rem', background: 'var(--primary-dark)', color: 'white', fontWeight: 900 }}>MANUAL STOCK ADJUSTMENT</div>
+            <form onSubmit={handleInventoryAdjust} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>SELECT ITEM</label>
+                <select value={inventoryForm.itemId} onChange={e => setInventoryForm({...inventoryForm, itemId: e.target.value})} required className="form-input">
+                  <option value="">Select Item...</option>
+                  {inventory.map(i => <option key={i.id} value={i.id}>{i.name} (Cur: {i.currentStock})</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>TYPE</label>
+                  <select value={inventoryForm.type} onChange={e => setInventoryForm({...inventoryForm, type: e.target.value})} className="form-input">
+                    <option value="IN">Stock In (+)</option>
+                    <option value="OUT">Stock Out (-)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>QUANTITY</label>
+                  <input type="number" min="1" value={inventoryForm.quantity} onChange={e => setInventoryForm({...inventoryForm, quantity: e.target.value})} className="form-input" />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>REASON</label>
+                <input type="text" value={inventoryForm.reason} onChange={e => setInventoryForm({...inventoryForm, reason: e.target.value})} className="form-input" placeholder="e.g. Damage, Donation, Correction" />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setIsInventoryModalOpen(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Adjust Stock</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Purchase Modal */}
+      {isPurchaseModalOpen && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal" style={{ maxWidth: '500px', borderRadius: '20px' }}>
+            <div style={{ padding: '1.25rem', background: 'var(--primary-dark)', color: 'white', fontWeight: 900 }}>RECORD PURCHASE / STOCK IN</div>
+            <form onSubmit={handleCreatePurchase} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>DESCRIPTION / ITEM NAME *</label>
+                <input list="stockItems" value={purchaseForm.description} onChange={e => setPurchaseForm({...purchaseForm, description: e.target.value})} required className="form-input" placeholder="Type name or select from stock..." />
+                <datalist id="stockItems">
+                  {inventory.map(i => <option key={i.id} value={i.name} />)}
+                </datalist>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>QUANTITY</label>
+                  <input type="number" min="1" value={purchaseForm.quantity} onChange={e => {
+                    const q = parseFloat(e.target.value) || 0;
+                    setPurchaseForm({...purchaseForm, quantity: q, totalPrice: q * purchaseForm.unitPrice});
+                  }} className="form-input" />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>UNIT PRICE</label>
+                  <input type="number" value={purchaseForm.unitPrice} onChange={e => {
+                    const p = parseFloat(e.target.value) || 0;
+                    setPurchaseForm({...purchaseForm, unitPrice: p, totalPrice: p * purchaseForm.quantity});
+                  }} className="form-input" />
+                </div>
+              </div>
+              <div style={{ padding: '10px', background: '#fff1f2', borderRadius: '10px', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#dc2626' }}>TOTAL COST</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 1000, color: '#dc2626' }}>{purchaseForm.totalPrice.toLocaleString()} RWF</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>ACCOUNT / METHOD</label>
+                  <select value={purchaseForm.paymentMethod} onChange={e => setPurchaseForm({...purchaseForm, paymentMethod: e.target.value})} className="form-input">
+                    <option value="Cash">Cash</option>
+                    <option value="MoMo">Mobile Money</option>
+                    <option value="Bank">Bank Transfer</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>DEPARTMENT</label>
+                  <select value={purchaseForm.department} onChange={e => setPurchaseForm({...purchaseForm, department: e.target.value})} className="form-input">
+                    <option value="Logistics">Logistics</option>
+                    <option value="Papeterie">Papeterie</option>
+                    <option value="Studio">Studio</option>
+                    <option value="Flowers">Flowers</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                <button type="button" onClick={() => setIsPurchaseModalOpen(false)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Record Purchase</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <style>{`
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .hover-row:hover { background: #f8fafc !important; }
+
+        .summary-grid { grid-template-columns: repeat(6, 1fr); }
+        .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        .inventory-grid { grid-template-columns: 1.2fr 0.8fr; }
+
+        @media (max-width: 1200px) {
+          .summary-grid { grid-template-columns: repeat(3, 1fr); }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+          .summary-grid { grid-template-columns: repeat(2, 1fr); }
+          .stats-grid { grid-template-columns: 1fr; }
+          .inventory-grid { grid-template-columns: 1fr; }
+          .tab-nav { flex-direction: column; gap: 0.5rem !important; }
+          .tab-nav button { text-align: left; padding: 10px 15px !important; }
+          .admin-modal { width: 95% !important; margin: 10px; }
+        }
+
+        @media (max-width: 480px) {
+          .summary-grid { grid-template-columns: 1fr; }
+        }
       `}</style>
     </div>
   );

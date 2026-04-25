@@ -1,4 +1,4 @@
-import JsBarcode from 'jsbarcode';
+import JsBarcode from "jsbarcode";
 
 /**
  * generateReport — DRAVANUA HUB
@@ -49,9 +49,9 @@ export function generateReport({
       width: 2,
       height: 48,
       displayValue: false,
-      lineColor: "#1B5E20",
+      lineColor: "#32FC05",
       background: "#ffffff",
-      margin: 0
+      margin: 0,
     });
   } catch (e) {
     console.error("Barcode generation failed", e);
@@ -65,25 +65,25 @@ export function generateReport({
     body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #fff; color: #1a1a2e; font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { padding: 36px 44px; max-width: 900px; margin: 0 auto; }
     .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-35deg); font-size: 80px; font-weight: 900; color: rgba(27,94,32,0.04); pointer-events: none; white-space: nowrap; z-index: 0; }
-    .header-band { background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 60%, #43A047 100%); color: white; padding: 28px 36px; border-radius: 16px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .header-band { background: linear-gradient(135deg, #32FC05 0%, #2E7D32 60%, #43A047 100%); color: white; padding: 28px 36px; border-radius: 16px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
     .brand-name { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
     .brand-sub  { font-size: 12px; opacity: 0.8; margin-top: 4px; }
     .report-meta { text-align: right; display: flex; flex-direction: column; gap: 5px; }
     .meta-row { font-size: 11px; opacity: 0.85; }
     .meta-row strong { opacity: 1; font-weight: 700; }
     .report-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
-    .gen-strip { background: #f0f7f0; border: 1px solid #c8e6c9; border-left: 4px solid #1B5E20; padding: 12px 20px; border-radius: 0 10px 10px 0; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; font-size: 11px; color: #444; }
-    .gen-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #1B5E20, #43A047); color: white; font-weight: 900; font-size: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .gen-strip { background: #f0f7f0; border: 1px solid #c8e6c9; border-left: 4px solid #32FC05; padding: 12px 20px; border-radius: 0 10px 10px 0; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; font-size: 11px; color: #444; }
+    .gen-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #32FC05, #43A047); color: white; font-weight: 900; font-size: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .gen-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
-    .gen-value { font-weight: 700; color: #1B5E20; font-size: 12px; }
-    .section-title { font-size: 13px; font-weight: 800; color: #1B5E20; text-transform: uppercase; letter-spacing: 0.8px; margin: 22px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #e8f5e9; display: flex; align-items: center; gap: 8px; }
-    .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #1B5E20; border-radius: 2px; }
+    .gen-value { font-weight: 700; color: #32FC05; font-size: 12px; }
+    .section-title { font-size: 13px; font-weight: 800; color: #32FC05; text-transform: uppercase; letter-spacing: 0.8px; margin: 22px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #e8f5e9; display: flex; align-items: center; gap: 8px; }
+    .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: #32FC05; border-radius: 2px; }
     .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-    .metric-card { background: linear-gradient(135deg, #f8fdf8, #f0f7f0); border: 1px solid #c8e6c9; border-top: 3px solid #1B5E20; padding: 16px 12px; border-radius: 10px; text-align: center; }
-    .metric-val { display: block; font-size: 22px; font-weight: 900; color: #1B5E20; }
+    .metric-card { background: linear-gradient(135deg, #f8fdf8, #f0f7f0); border: 1px solid #c8e6c9; border-top: 3px solid #32FC05; padding: 16px 12px; border-radius: 10px; text-align: center; }
+    .metric-val { display: block; font-size: 22px; font-weight: 900; color: #32FC05; }
     .metric-lbl { display: block; font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
-    thead tr { background: #1B5E20; color: white; }
+    thead tr { background: #32FC05; color: white; }
     th { padding: 10px 12px; font-weight: 700; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; text-align: left; }
     td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
     tbody tr:nth-child(even) { background: #fafff9; }
@@ -93,7 +93,7 @@ export function generateReport({
     .badge-blue   { background: #e3f2fd; color: #1565c0; }
     .badge-yellow { background: #fffde7; color: #f57f17; }
     .score-bar-wrap { background: #e8f5e9; border-radius: 4px; height: 8px; width: 100px; overflow: hidden; display:inline-block; vertical-align:middle; }
-    .score-bar-fill { height: 100%; background: linear-gradient(90deg, #43A047, #1B5E20); border-radius: 4px; }
+    .score-bar-fill { height: 100%; background: linear-gradient(90deg, #43A047, #32FC05); border-radius: 4px; }
     .divider { border: none; border-top: 1px solid #e8f5e9; margin: 20px 0; }
     .page-break { page-break-before: always; padding-top: 36px; }
     .cert-box { background: #fffde7; border: 1px solid #fff176; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
@@ -114,7 +114,7 @@ export function generateReport({
 
   const miniHeader = `
     <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:14px; border-bottom:2px solid #e8f5e9; margin-bottom:22px; font-size:11px; color:#666;">
-      <strong style="color:#1B5E20;">DRAVANUA HUB</strong> — ${title}
+      <strong style="color:#32FC05;">DRAVANUA HUB</strong> — ${title}
       <span>${reportId} &nbsp;|&nbsp; ${reportDate}</span>
     </div>`;
 
@@ -135,7 +135,7 @@ export function generateReport({
     </div>
     <div class="barcode-section" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; background: #fafafa; margin-top: 28px; text-align: left;">
       <div style="flex: 1;">
-         <h4 style="color: #1B5E20; margin-bottom: 5px; font-size: 13px; font-weight: 900;">DRAVANUA HUB</h4>
+         <h4 style="color: #32FC05; margin-bottom: 5px; font-size: 13px; font-weight: 900;">DRAVANUA HUB</h4>
          <p style="font-size: 10.5px; color: #555; line-height: 1.6; margin-bottom: 6px;">Studio, Classic Fashion, Flower Gifts, Stationery & Office Supplies.</p>
          <p style="font-size: 10px; color: #777;"><strong>Printed by:</strong> ${generatedBy} on ${reportDate}</p>
       </div>
