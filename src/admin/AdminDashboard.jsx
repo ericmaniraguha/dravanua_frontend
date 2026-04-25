@@ -191,7 +191,7 @@ const AdminDashboard = () => {
 
       {/* ── Summary Cards ──────────────────────────────────────────────── */}
       <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>TOTAL REVENUE</div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => setShowBalances(!showBalances)}
-              style={{ padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#32FC05', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               {showBalances ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -291,15 +291,15 @@ const AdminDashboard = () => {
         {/* Revenue table */}
         {isSuper && (
           <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>REVENUE AUDIT</div>
-                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px' }}>LAST 30 DAYS · {recentReports.length} RECORDS</div>
-              </div>
-              <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
-                <div style={{ color: '#32FC05' }}>CONFIDENTIAL</div>
-              </div>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>REVENUE AUDIT</div>
+              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px' }}>LAST 30 DAYS · {recentReports.length} RECORDS</div>
             </div>
+            <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
+              <div style={{ color: 'white' }}>CONFIDENTIAL</div>
+            </div>
+          </div>
 
             {recentReports.length === 0 ? (
               <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
@@ -316,7 +316,7 @@ const AdminDashboard = () => {
                           padding: '10px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
                           textTransform: 'uppercase', letterSpacing: '0.06em',
                           textAlign: h === 'AMOUNT' ? 'right' : 'left',
-                          background: 'linear-gradient(180deg, #32FC05, #068637ff)',
+                          background: 'linear-gradient(180deg, #32FC05, #166534)',
                           borderRight: '1px solid rgba(255,255,255,0.1)'
                         }}>{h}</th>
                       ))}
@@ -333,9 +333,9 @@ const AdminDashboard = () => {
                       </tr>
                     ))}
                     {/* Totals row */}
-                    <tr style={{ background: '#f0fdf4', borderTop: '2px solid #32FC05' }}>
-                      <td colSpan={2} style={{ padding: '10px 14px', fontWeight: 900, fontSize: '0.72rem', color: '#32FC05', textAlign: 'right' }}>TOTAL:</td>
-                      <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 900, fontSize: '0.85rem', color: '#32FC05' }}>
+                    <tr style={{ background: 'rgba(50,252,5,0.05)', borderTop: '2px solid #32FC05' }}>
+                      <td colSpan={2} style={{ padding: '10px 14px', fontWeight: 900, fontSize: '0.72rem', color: '#166534', textAlign: 'right' }}>TOTAL:</td>
+                      <td style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 900, fontSize: '0.85rem', color: '#166534' }}>
                         {showBalances ? fmtAmt(reportTotals.revenue, currency) : '••••'}
                       </td>
                     </tr>

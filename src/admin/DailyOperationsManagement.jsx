@@ -549,7 +549,7 @@ const DailyOperationsManagement = () => {
       />
 
       {/* Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', color: 'black', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div className="summary-grid" style={{ display: 'grid', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>TODAY'S OPERATIONS</div>
@@ -569,7 +569,7 @@ const DailyOperationsManagement = () => {
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>EFFICIENCY</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#A5D6A7' }}>{summaryData.efficiencyRate}%</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'black' }}>{summaryData.efficiencyRate}%</div>
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>ON-TIME RATE</div>
@@ -712,14 +712,14 @@ const DailyOperationsManagement = () => {
       {/* Daily Operations Table */}
       {activeTab === 'operations' && (
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>DRAVANUA HUB — DAILY OPERATIONS</div>
-              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '0.06em' }}>REAL-TIME OPERATIONAL TRACKING · {filteredOperations.length} ACTIVE OPERATIONS</div>
+              <div style={{ color: 'black', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>DRAVANUA HUB — DAILY OPERATIONS</div>
+              <div style={{ color: 'rgba(0,0,0,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '0.06em' }}>REAL-TIME OPERATIONAL TRACKING · {filteredOperations.length} ACTIVE OPERATIONS</div>
             </div>
-            <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
+            <div style={{ textAlign: 'right', color: 'rgba(0,0,0,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
               <div>Generated: {new Date().toLocaleDateString()}</div>
-              <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
+              <div style={{ marginTop: '3px', color: 'black' }}>CONFIDENTIAL — INTERNAL USE</div>
             </div>
           </div>
 
