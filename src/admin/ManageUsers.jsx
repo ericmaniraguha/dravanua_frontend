@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Users, Mail, Shield, UserCheck, UserX, Trash2, Plus, X, CheckCircle, Clock, Search, User, Building2, RefreshCw, Key, UserPlus, Globe, Camera, Save, Edit, QrCode, Eye, EyeOff, Info } from 'lucide-react';
 
 const LinkedinIcon = ({ size = 16, color = 'currentColor' }) => (
@@ -15,7 +16,7 @@ const LinkedinIcon = ({ size = 16, color = 'currentColor' }) => (
 );
 
 const ManageUsers = () => {
-  const { user: currentUser } = useOutletContext() || {};
+  const { user: currentUser, secureFetch } = useAuth();
   const isSuper = currentUser?.role === 'super_admin';
   const navigate = useNavigate();
 
@@ -25,11 +26,13 @@ const ManageUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showBalances, setShowBalances] = useState(true);
   const [formData, setFormData] = useState({
+    id: null,
     name: '',
     email: '',
     role: 'service_admin',
     departmentId: ''
   });
+  const [isEditMode, setIsEditMode] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -42,11 +45,11 @@ const ManageUsers = () => {
 
   const fetchUsersAndTeam = async () => {
     try {
-      const headers = { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` };
+      setLoading(true);
       const [userRes, teamRes, deptRes] = await Promise.all([
-        fetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/users', { headers }),
-        fetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/team', { headers }),
-        fetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/departments', { headers })
+        secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users`),
+        secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/team`),
+        secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/departments`)
       ]);
       const userData = await userRes.json();
       const teamData = await teamRes.json();
@@ -56,7 +59,7 @@ const ManageUsers = () => {
       if (teamData.success) setTeamMembers(teamData.data);
       if (deptData.success) setDepartments(deptData.data);
     } catch (error) {
-      console.error('Failed to fetch data');
+      console.error('Failed to fetch staff data:', error);
     } finally {
       setLoading(false);
     }
@@ -74,15 +77,12 @@ const ManageUsers = () => {
     if (!window.confirm(`Are you sure you want to ${action} this user? An email notification will be sent to them.`)) return;
 
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}`, {
+      const resp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !user.isActive })
       });
-      fetchUsersAndTeam();
+      if (resp.ok) fetchUsersAndTeam();
     } catch (error) {
       alert('Failed to update status');
     }
@@ -96,11 +96,10 @@ const ManageUsers = () => {
     if (!window.confirm(`Are you sure you want to ${actionDesc} this user?`)) return;
 
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}`, {
+      await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
         body: JSON.stringify({ role: newRole })
       });
@@ -113,9 +112,8 @@ const ManageUsers = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${id}`, {
+      await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       fetchUsersAndTeam();
     } catch (error) {
@@ -126,9 +124,8 @@ const ManageUsers = () => {
   const handleResendCode = async (user) => {
     if (!window.confirm(`Resend activation code to ${user.email}?`)) return;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}/resend-code`, {
+      const response = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${user.id}/resend-code`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       const data = await response.json();
       if (data.success) {
@@ -144,30 +141,56 @@ const ManageUsers = () => {
     }
   };
 
-  const handleCreateUser = async (e) => {
+  const handleSubmitUser = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
-        body: JSON.stringify(formData)
+      if (isEditMode && !isSuper) {
+        alert('Permission Denied: Only Super Admin can modify existing staff accounts.');
+        return;
+      }
+
+      const url = isEditMode 
+        ? `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users/${formData.id}`
+        : `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/users`;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      const submissionData = { ...formData };
+      delete submissionData.id; // Backend uses params.id
+      if (!submissionData.departmentId) submissionData.departmentId = null;
+      
+      const response = await secureFetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissionData)
       });
       const data = await response.json();
       if (data.success) {
-        setGeneratedCode(data.registrationCode);
-        setShowSuccessModal(true);
+        if (!isEditMode) {
+          setGeneratedCode(data.registrationCode);
+          setShowSuccessModal(true);
+        }
         setIsModalOpen(false);
-        setFormData({ name: '', email: '', role: 'service_admin', departmentId: '' });
+        setIsEditMode(false);
+        setFormData({ id: null, name: '', email: '', role: 'service_admin', departmentId: '' });
         fetchUsersAndTeam();
       } else {
-        alert(data.error || 'Failed to create user');
+        alert(data.error || data.message || `Failed to ${isEditMode ? 'update' : 'create'} user`);
       }
     } catch (error) {
       alert('Error connecting to server');
     }
+  };
+
+  const openEditModal = (user) => {
+    setIsEditMode(true);
+    setFormData({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      departmentId: user.departmentId || ''
+    });
+    setIsModalOpen(true);
   };
 
   const handleImageUpload = async (e) => {
@@ -179,9 +202,8 @@ const ManageUsers = () => {
     form.append('image', file);
 
     try {
-      const response = await fetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/upload-image', {
+      const response = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/upload-image`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
         body: form
       });
       const data = await response.json();
@@ -209,12 +231,9 @@ const ManageUsers = () => {
     }
 
     try {
-      const response = await fetch(url, {
+      const response = await secureFetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(teamFormData)
       });
       if (response.ok) {
@@ -242,7 +261,7 @@ const ManageUsers = () => {
     const dept = departments.find(d => String(d.id) === String(deptId));
     return { 
       bg: '#e8f5e9', 
-      color: '#1B5E20', 
+      color: 'var(--primary-dark)', 
       label: dept ? dept.name : 'Unknown Department' 
     };
   };
@@ -251,7 +270,7 @@ const ManageUsers = () => {
     return (
       <div className="admin-page center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#1B5E20' }} />
+          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: 'var(--primary-dark)' }} />
           <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b' }}>Loading staff directory...</p>
         </div>
       </div>
@@ -266,7 +285,7 @@ const ManageUsers = () => {
       />
 
       {/* Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em' }}>TOTAL STAFF</div>
@@ -316,7 +335,7 @@ const ManageUsers = () => {
               onClick={() => setShowBalances(!showBalances)}
               style={{
                 padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px',
-                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20', display: 'flex', alignItems: 'center', gap: '6px'
+                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '6px'
               }}
             >
               {showBalances ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -338,7 +357,7 @@ const ManageUsers = () => {
 
       {/* Staff Directory Table */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, var(--primary-deeper), var(--primary-dark))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — STAFF DIRECTORY & MANAGEMENT
@@ -349,21 +368,21 @@ const ManageUsers = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1100px' }}>
             <thead>
-              <tr style={{ background: '#1B5E20' }}>
-                {['STAFF MEMBER', isSuper ? 'STAFF ID' : null, isSuper ? 'SYSTEM UUID' : null, 'ROLE / DEPARTMENT', 'VERIFICATION', 'STATUS', 'WEBSITE PROFILE', 'ACTIONS'].filter(Boolean).map(h => (
+              <tr style={{ background: 'var(--primary-dark)' }}>
+                {['STAFF MEMBER', isSuper ? 'STAFF ID' : null, isSuper ? 'SYSTEM UUID' : null, 'ROLE / DEPARTMENT', 'VERIFICATION', 'STATUS', isSuper ? 'WEBSITE PROFILE' : null, 'ACTIONS'].filter(Boolean).map(h => (
                   <th key={h} style={{
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: (h === 'ACTIONS' || h === 'STATUS' || h === 'VERIFICATION') ? 'center' : 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, var(--primary-dark), var(--primary-deeper))'
                   }}>{h}</th>
                 ))}
               </tr>
@@ -378,7 +397,7 @@ const ManageUsers = () => {
                   }} className="hover-row">
                     <td style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', flexShrink: 0 }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem', flexShrink: 0 }}>
                           {user.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div>
@@ -391,7 +410,7 @@ const ManageUsers = () => {
                     </td>
                     {isSuper && (
                       <td style={{ padding: '12px' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#1B5E20', background: '#f0faf0', padding: '4px 10px', borderRadius: '6px', fontWeight: 900, fontFamily: 'monospace', border: '1px solid #dcfce7', width: 'fit-content' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--primary-dark)', background: '#f0faf0', padding: '4px 10px', borderRadius: '6px', fontWeight: 900, fontFamily: 'monospace', border: '1px solid #dcfce7', width: 'fit-content' }}>
                           {user.staffCode || 'EMP-ID'}
                         </div>
                       </td>
@@ -441,7 +460,7 @@ const ManageUsers = () => {
                             <Clock size={14} /> Pending
                           </div>
                           {user.registrationCode && (
-                            <div style={{ fontSize: '0.65rem', color: '#1B5E20', background: '#f0faf0', padding: '2px 6px', borderRadius: '4px', fontWeight: 900, fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--primary-dark)', background: '#f0faf0', padding: '2px 6px', borderRadius: '4px', fontWeight: 900, fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <Key size={10} /> {user.registrationCode}
                             </div>
                           )}
@@ -458,41 +477,43 @@ const ManageUsers = () => {
                         fontSize: '0.7rem',
                         fontWeight: 900,
                         background: user.isActive ? '#e8f5e9' : '#fef2f2',
-                        color: user.isActive ? '#1B5E20' : '#dc3545',
+                        color: user.isActive ? 'var(--primary-dark)' : '#dc3545',
                       }}>
-                        <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: user.isActive ? '#32CD32' : '#dc3545' }}></div>
+                        <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: user.isActive ? 'var(--primary)' : '#dc3545' }}></div>
                         {user.isActive ? 'Active' : 'Disabled'}
                       </div>
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      {(() => {
-                        const profile = teamMembers.find(t => t.adminUserId === user.id || t.name === user.name);
-                        return (
-                          <button
-                            onClick={() => {
-                              if (profile) {
-                                setTeamFormData({ ...profile, isHired: user.isActive, email: profile.email || '', phone: profile.phone || '' });
-                              } else {
-                                const inits = user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-                                setTeamFormData({ id: null, name: user.name, role: user.role === 'super_admin' ? 'Super Admin' : 'Staff', initials: inits, linkedin: '', image: '', isHired: user.isActive, order: teamMembers.length, adminUserId: user.id, email: user.email, phone: '' });
-                              }
-                              setIsTeamModalOpen(true);
-                            }}
-                            className="btn btn-outline"
-                            style={{
-                              padding: '6px 12px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px',
-                              background: profile ? '#f0fdf4' : 'transparent',
-                              borderColor: profile ? '#bbf7d0' : '#e2e8f0',
-                              color: profile ? '#16a34a' : '#64748b',
-                              fontWeight: 800
-                            }}
-                          >
-                            {profile ? <CheckCircle size={14} color="#16a34a" /> : <Globe size={14} color="#94a3b8" />}
-                            {profile ? '✓ Done' : 'Add'}
-                          </button>
-                        );
-                      })()}
-                    </td>
+                    {isSuper && (
+                      <td style={{ padding: '12px', textAlign: 'center' }}>
+                        {(() => {
+                          const profile = teamMembers.find(t => t.adminUserId === user.id || t.name === user.name);
+                          return (
+                            <button
+                              onClick={() => {
+                                if (profile) {
+                                  setTeamFormData({ ...profile, isHired: user.isActive, email: profile.email || '', phone: profile.phone || '' });
+                                } else {
+                                  const inits = user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                                  setTeamFormData({ id: null, name: user.name, role: user.role === 'super_admin' ? 'Super Admin' : 'Staff', initials: inits, linkedin: '', image: '', isHired: user.isActive, order: teamMembers.length, adminUserId: user.id, email: user.email, phone: '' });
+                                }
+                                setIsTeamModalOpen(true);
+                              }}
+                              className="btn btn-outline"
+                              style={{
+                                padding: '6px 12px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px',
+                                background: profile ? '#f0fdf4' : 'transparent',
+                                borderColor: profile ? '#bbf7d0' : '#e2e8f0',
+                                color: profile ? '#16a34a' : '#64748b',
+                                fontWeight: 800
+                              }}
+                            >
+                              {profile ? <CheckCircle size={14} color="#16a34a" /> : <Globe size={14} color="#94a3b8" />}
+                              {profile ? '✓ Done' : 'Add'}
+                            </button>
+                          );
+                        })()}
+                      </td>
+                    )}
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <div style={{
                         display: 'flex',
@@ -500,11 +521,20 @@ const ManageUsers = () => {
                         justifyContent: 'center',
                         flexWrap: 'wrap'
                       }}>
-                        <button
-                          type="button"
-                          onClick={() => navigate('/admin/messages-admin', { state: { recipient: user.name } })}
+                         <button
+                           type="button"
+                           onClick={() => openEditModal(user)}
+                           title="Edit User"
+                           style={{ padding: '6px 8px', borderRadius: '6px', background: '#f1f5f9', color: 'var(--primary-dark)', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                         >
+                           <Edit size={14} />
+                         </button>
+
+                         <button
+                           type="button"
+                           onClick={() => navigate('/admin/messages-admin', { state: { recipient: user.name } })}
                           title="Send Message"
-                          style={{ padding: '6px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#1B5E20', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                          style={{ padding: '6px 8px', borderRadius: '6px', background: '#f1f5f9', color: 'var(--primary-dark)', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                         >
                           <Mail size={14} />
                         </button>
@@ -580,18 +610,18 @@ const ManageUsers = () => {
       {isModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '680px', width: '95%', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <UserPlus size={22} />
+                {isEditMode ? <Edit size={22} /> : <UserPlus size={22} />}
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>Invite New Staff</h3>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#e2e8f0' }}>A registration email will be sent automatically</p>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{isEditMode ? 'Update Staff Member' : 'Invite New Staff'}</h3>
+                  {!isEditMode && <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#e2e8f0' }}>A registration email will be sent automatically</p>}
                 </div>
               </div>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
+              <button onClick={() => { setIsModalOpen(false); setIsEditMode(false); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', fontSize: '1.5rem' }}>×</button>
             </div>
 
-            <form onSubmit={handleCreateUser} style={{ padding: '1.75rem', overflowY: 'auto', flex: 1 }}>
+            <form onSubmit={handleSubmitUser} style={{ padding: '1.75rem', overflowY: 'auto', flex: 1 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
                   <label style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px', display: 'block' }}>Full Name *</label>
@@ -602,7 +632,7 @@ const ManageUsers = () => {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = 'var(--primary-dark)'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   />
                 </div>
@@ -616,7 +646,7 @@ const ManageUsers = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                     style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.95rem', fontWeight: 700, outline: 'none' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = 'var(--primary-dark)'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   />
                 </div>
@@ -629,7 +659,7 @@ const ManageUsers = () => {
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-                      onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                      onFocus={e => e.target.style.borderColor = 'var(--primary-dark)'}
                       onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     >
                       <option value="user">👤 Normal User</option>
@@ -645,7 +675,7 @@ const ManageUsers = () => {
                       value={formData.departmentId}
                       onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
                       style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-                      onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                      onFocus={e => e.target.style.borderColor = 'var(--primary-dark)'}
                       onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     >
                       <option value="">🏢 General</option>
@@ -664,8 +694,8 @@ const ManageUsers = () => {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}>
                 <button type="button" className="btn btn-outline" onClick={() => setIsModalOpen(false)} style={{ height: '42px', padding: '0 20px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800 }}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ height: '42px', padding: '0 24px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Mail size={16} /> Send Invitation
+                  <button type="submit" className="btn btn-primary" style={{ height: '42px', padding: '0 24px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {isEditMode ? <Save size={16} /> : <Mail size={16} />} {isEditMode ? 'Save Changes' : 'Send Invitation'}
                 </button>
               </div>
             </form>
@@ -678,17 +708,17 @@ const ManageUsers = () => {
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '400px', borderRadius: '24px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
             <div style={{ padding: '2rem' }}>
-              <div style={{ background: '#e8f5e9', color: '#2e7d32', width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+              <div style={{ background: '#e8f5e9', color: 'var(--secondary)', width: '56px', height: '56px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
                 <CheckCircle size={28} />
               </div>
-              <h3 style={{ marginBottom: '0.5rem', fontSize: '1.15rem', fontWeight: 900, color: '#1B5E20' }}>Staff Invited Successfully!</h3>
+              <h3 style={{ marginBottom: '0.5rem', fontSize: '1.15rem', fontWeight: 900, color: 'var(--primary-dark)' }}>Staff Invited Successfully!</h3>
               <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.85rem' }}>
                 An invitation email has been sent to <strong>{formData.email}</strong>.
                 Share the code below via <strong>WhatsApp / Phone</strong>.
               </p>
 
-              <div style={{ background: '#f8faf8', padding: '1.25rem', borderRadius: '14px', marginBottom: '1.25rem', border: '2px dashed #32CD32' }}>
-                <span style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '6px', color: '#1B5E20' }}>
+              <div style={{ background: '#f8faf8', padding: '1.25rem', borderRadius: '14px', marginBottom: '1.25rem', border: '2px dashed var(--primary)' }}>
+                <span style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '6px', color: 'var(--primary-dark)' }}>
                   {generatedCode}
                 </span>
               </div>
@@ -709,7 +739,7 @@ const ManageUsers = () => {
       {isTeamModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--primary))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Globe size={22} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>Public Website Profile</h3>
@@ -725,7 +755,7 @@ const ManageUsers = () => {
                 }}>
                   <input type="file" style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
                   {!teamFormData.image && !isUploading && <Camera size={24} color="#94a3b8" />}
-                  {isUploading && <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#1B5E20' }}>Uploading...</span>}
+                  {isUploading && <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--primary-dark)' }}>Uploading...</span>}
                 </label>
 
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -824,9 +854,9 @@ const ManageUsers = () => {
                     id="hiredBox"
                     checked={teamFormData.isHired}
                     onChange={(e) => setTeamFormData({ ...teamFormData, isHired: e.target.checked })}
-                    style={{ width: '16px', height: '16px', accentColor: '#1B5E20', cursor: 'pointer' }}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--primary-dark)', cursor: 'pointer' }}
                   />
-                  <label htmlFor="hiredBox" style={{ fontWeight: 800, fontSize: '0.85rem', color: '#1B5E20', cursor: 'pointer' }}>Visible on Website</label>
+                  <label htmlFor="hiredBox" style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary-dark)', cursor: 'pointer' }}>Visible on Website</label>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>

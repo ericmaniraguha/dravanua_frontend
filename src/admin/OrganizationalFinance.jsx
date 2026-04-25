@@ -64,6 +64,12 @@ const OrganizationalFinance = () => {
   const [overview, setOverview] = useState({ totalLoans: 0, totalSavings: 0 });
   const [loans, setLoans] = useState([]);
   const [savings, setSavings] = useState([]);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 90); // Default to last 90 days for finance
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Summary Statistics
   const [summaryData, setSummaryData] = useState({
@@ -118,9 +124,9 @@ const OrganizationalFinance = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const respOverview = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/overview`);
-      const respLoans = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/loans`);
-      const respSavings = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/savings`);
+      const respOverview = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/overview?start=${startDate}&end=${endDate}`);
+      const respLoans = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/loans?start=${startDate}&end=${endDate}`);
+      const respSavings = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/org-finance/savings?start=${startDate}&end=${endDate}`);
 
       const ov = await respOverview.json();
       const ln = await respLoans.json();
@@ -165,7 +171,7 @@ const OrganizationalFinance = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [startDate, endDate]);
 
   // Handle Functions
   const handleCreateLoan = async (e) => {
@@ -334,7 +340,7 @@ const OrganizationalFinance = () => {
           <span class="metric-lbl">TOTAL RESERVE CAPITAL</span>
         </div>
         <div class="metric-card">
-          <span class="metric-val" style="color: ${netWorth >= 0 ? '#1B5E20' : '#ef4444'};">${netWorth < 0 ? '-' : ''}${Math.abs(Math.round(netWorth)).toLocaleString()} RWF</span>
+          <span class="metric-val" style="color: ${netWorth >= 0 ? '#32FC05' : '#ef4444'};">${netWorth < 0 ? '-' : ''}${Math.abs(Math.round(netWorth)).toLocaleString()} RWF</span>
           <span class="metric-lbl">NET LIQUIDITY POSITION</span>
         </div>
         <div class="metric-card">
@@ -424,7 +430,7 @@ const OrganizationalFinance = () => {
     const totalS = savings.reduce((s, acc) => s + (acc.currentBalance || 0), 0);
     return `
       <div style="font-family: 'Inter', sans-serif; max-width: 700px; margin: 0 auto; color: #1e293b;">
-        <div style="background: linear-gradient(135deg, #1B5E20, #2E7D32); padding: 30px; border-radius: 16px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(27,94,32,0.15);">
+        <div style="background: linear-gradient(135deg, #32FC05, #2E7D32); padding: 30px; border-radius: 16px; color: white; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(27,94,32,0.15);">
           <h1 style="margin: 0; font-size: 22px; font-weight: 900;">DRAVANUA HUB — Treasury Audit</h1>
           <p style="margin: 8px 0 0; opacity: 0.8; font-size: 14px;">Institutional Financial Standings & Reserve Summary</p>
         </div>
@@ -440,7 +446,7 @@ const OrganizationalFinance = () => {
           </div>
         </div>
 
-        <h3 style="color: #1B5E20; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Top Debt Line Items</h3>
+        <h3 style="color: #32FC05; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Top Debt Line Items</h3>
         <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 30px;">
           ${loans.slice(0, 5).map(l => `
             <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -482,7 +488,7 @@ const OrganizationalFinance = () => {
       <Header title="Organizational Finance & Treasury" subtitle="Corporate debt portfolio, reserve capital management, and institutional liquidity planning." />
 
       {/* Treasury Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>TOTAL DEBT</div>
@@ -531,7 +537,7 @@ const OrganizationalFinance = () => {
                     alignItems: 'center',
                     gap: '8px',
                     background: activeView === view.id ? 'white' : 'transparent',
-                    color: activeView === view.id ? '#1B5E20' : '#64748b',
+                    color: activeView === view.id ? '#32FC05' : '#64748b',
                     boxShadow: activeView === view.id ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
@@ -544,6 +550,22 @@ const OrganizationalFinance = () => {
 
           {/* Action Toolbar */}
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', padding: '4px 8px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <Calendar size={14} className="text-muted" />
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={e => setStartDate(e.target.value)} 
+                style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+              />
+              <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={e => setEndDate(e.target.value)} 
+                style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} 
+              />
+            </div>
             <div className="admin-search-wrapper" style={{ width: '250px', height: '44px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
               <Search size={16} color="#94a3b8" />
               <input
@@ -682,7 +704,7 @@ const OrganizationalFinance = () => {
                       });
                       setIsReminderModalOpen(true);
                     }}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#1B5E20', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#32FC05', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Bell size={16} />
                   </button>
@@ -731,7 +753,7 @@ const OrganizationalFinance = () => {
                     {formatValue(acc.currentBalance)}
                   </h3>
                   {acc.purpose && (
-                    <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Purpose: <span style={{ color: '#1B5E20', fontWeight: 800 }}>{acc.purpose}</span></div>
+                    <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Purpose: <span style={{ color: '#32FC05', fontWeight: 800 }}>{acc.purpose}</span></div>
                   )}
                 </div>
 
@@ -764,7 +786,7 @@ const OrganizationalFinance = () => {
                       });
                       setIsReminderModalOpen(true);
                     }}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#1B5E20', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0', background: 'white', color: '#32FC05', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Bell size={16} />
                   </button>
@@ -1044,7 +1066,7 @@ const OrganizationalFinance = () => {
       {isReminderModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: '420px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.5rem', background: '#1B5E20', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+            <div style={{ padding: '1.5rem', background: '#32FC05', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
               <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem' }}>Set Financial Reminder</h3>
               <button onClick={() => setIsReminderModalOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={20} /></button>
             </div>
@@ -1099,7 +1121,7 @@ const OrganizationalFinance = () => {
                 <label htmlFor="sendToAll" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', cursor: 'pointer' }}>Broadcast to all administrators</label>
               </div>
 
-              <button type="submit" style={{ background: '#1B5E20', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.9rem' }}>Set Reminder</button>
+              <button type="submit" style={{ background: '#32FC05', color: 'white', padding: '14px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', fontSize: '0.9rem' }}>Set Reminder</button>
             </form>
           </div>
         </div>
@@ -1109,7 +1131,7 @@ const OrganizationalFinance = () => {
       {isDetailsModalOpen && selectedDetails && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: '400px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #1B5E20 0%, #32CD32 100%)', color: 'white' }}>
+            <div style={{ padding: '1.5rem', background: 'linear-gradient(135deg, #32FC05 0%, #32CD32 100%)', color: 'white' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0 }}>Financial Details</h2>
                 <button onClick={() => { setIsDetailsModalOpen(false); setSelectedDetails(null); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer' }}>
@@ -1202,7 +1224,7 @@ const OrganizationalFinance = () => {
                 </>
               )}
 
-              <button onClick={() => { setIsDetailsModalOpen(false); setSelectedDetails(null); }} style={{ background: '#1B5E20', color: 'white', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', marginTop: '1rem' }}>CLOSE</button>
+              <button onClick={() => { setIsDetailsModalOpen(false); setSelectedDetails(null); }} style={{ background: '#32FC05', color: 'white', padding: '12px', borderRadius: '12px', border: 'none', fontWeight: 900, cursor: 'pointer', marginTop: '1rem' }}>CLOSE</button>
             </div>
           </div>
         </div>

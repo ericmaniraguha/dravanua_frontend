@@ -15,46 +15,19 @@ const AttendanceLog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentRecord, setCurrentRecord] = useState(null);
   const [message, setMessage] = useState(null);
-  const [location, setLocation] = useState({ lat: null, lon: null, accuracy: null, status: 'Obtaining GPS...' });
+  const [hardwareStatus, setHardwareStatus] = useState('DEVICE_DISCONNECTED');
   const [clockLoading, setClockLoading] = useState(false);
   const [showBalances, setShowBalances] = useState(true);
 
-  const getGPSLocation = () => {
-    setLocation(prev => ({ ...prev, status: 'Obtaining GPS...' }));
-    if (!navigator.geolocation) {
-      fallbackIPGeo(0);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({ lat: position.coords.latitude, lon: position.coords.longitude, accuracy: position.coords.accuracy, status: 'GPS Fixed' });
-      },
-      (error) => fallbackIPGeo(error.code),
-      { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 }
-    );
-  };
-
-  const fallbackIPGeo = async (errorCode) => {
-    try {
-      setLocation(prev => ({ ...prev, status: 'Trying IP Geolocation...' }));
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      if (data.latitude && data.longitude) {
-        setLocation({ lat: data.latitude, lon: data.longitude, accuracy: 1000, status: 'Network Location Fixed' });
-      } else throw new Error('IP API failed');
-    } catch (err) {
-      let msg = 'Unknown error';
-      if (errorCode === 1) msg = 'Permission denied';
-      else if (errorCode === 2) msg = 'Location unavailable';
-      else if (errorCode === 3) msg = 'Timeout';
-      setLocation({ lat: null, lon: null, accuracy: null, status: `GPS Error: ${msg}` });
-    }
+  const checkHardwareStatus = () => {
+    // Simulated check for fingerprint device
+    setHardwareStatus('SCANNER_READY');
   };
 
   const handleClockAction = async (action) => {
     const endpoint = action === 'in' ? 'clock-in' : 'clock-out';
-    if (!location.lat || !location.lon) {
-      alert('GPS location is required to verify your attendance against the authorized office radius.');
+    if (hardwareStatus !== 'SCANNER_READY') {
+      alert('Fingerprint hardware not detected. Please reconnect the device.');
       return;
     }
     try {
@@ -63,14 +36,13 @@ const AttendanceLog = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          gps_lat: location.lat, 
-          gps_lon: location.lon, 
-          gps_accuracy: location.accuracy 
+          method: 'FINGERPRINT',
+          timestamp: new Date().toISOString()
         })
       });
       const data = await response.json();
       if (data.success) {
-        setMessage({ type: 'success', text: `Successfully clocked ${action}! Location recorded.` });
+        setMessage({ type: 'success', text: `Biometric authentication success. Successfully clocked ${action}!` });
         fetchLogs();
       } else setMessage({ type: 'error', text: data.message });
     } catch (error) {
@@ -104,7 +76,7 @@ const AttendanceLog = () => {
   }, [filters]);
 
   useEffect(() => {
-    getGPSLocation();
+    checkHardwareStatus();
   }, []);
 
   const filteredLogs = (logs || []).filter(log => {
@@ -184,7 +156,7 @@ const AttendanceLog = () => {
             const clockOut = log.clockOut ? new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'ON-DUTY';
             return `<tr>
               <td>${log.date || '—'}</td>
-              <td><strong>${log.userName || '—'}</strong><br/><span style="font-size:9px; color:#1B5E20; font-family: monospace;">${log.staffCode || '—'}</span></td>
+              <td><strong>${log.userName || '—'}</strong><br/><span style="font-size:9px; color:#32FC05; font-family: monospace;">${log.staffCode || '—'}</span></td>
               <td><span class="badge badge-blue">${String(log.department || 'General').toUpperCase()}</span></td>
               <td style="color:#16a34a;font-weight:700">${clockIn}</td>
               <td style="color:${log.clockOut ? '#dc2626' : '#94a3b8'};font-weight:700">${clockOut}</td>
@@ -208,8 +180,8 @@ const AttendanceLog = () => {
     return (
       <div className="admin-page center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#1B5E20' }} />
-          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b' }}>Loading attendance records...</p>
+          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#32FC05' }} />
+          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#000000' }}>Loading attendance records...</p>
         </div>
       </div>
     );
@@ -223,19 +195,19 @@ const AttendanceLog = () => {
       />
 
       {/* Time Clock Module */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '3rem 2rem', borderRadius: '24px', marginBottom: '2rem', position: 'relative', boxShadow: '0 10px 40px rgba(27, 94, 32, 0.15)' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '3rem 2rem', borderRadius: '24px', marginBottom: '2rem', position: 'relative', boxShadow: '0 10px 40px rgba(27, 94, 32, 0.15)' }}>
         <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
           <div style={{
             fontSize: '0.65rem', fontWeight: 900, color: 'white',
-            background: location.lat ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+            background: hardwareStatus === 'SCANNER_READY' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)',
             padding: '6px 12px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '6px',
-            border: `1px solid ${location.lat ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'}`
+            border: `1px solid ${hardwareStatus === 'SCANNER_READY' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'}`
           }}>
-            <div style={{ width: '6px', height: '6px', background: location.lat ? '#22c55e' : '#ef4444', borderRadius: '50%' }}></div>
-            {location.status}
+            <Activity size={14} color="white" />
+            {hardwareStatus === 'SCANNER_READY' ? 'FINGERPRINT SCANNER READY' : 'HARDWARE DISCONNECTED'}
           </div>
           <button
-            onClick={getGPSLocation}
+            onClick={checkHardwareStatus}
             style={{
               background: 'rgba(255,255,255,0.2)',
               border: '1px solid rgba(255,255,255,0.3)',
@@ -246,20 +218,19 @@ const AttendanceLog = () => {
               padding: '4px 8px',
               borderRadius: '6px',
               marginTop: '6px',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              width: '100%'
             }}
-            onMouseOver={e => e.target.style.background = 'rgba(255,255,255,0.3)'}
-            onMouseOut={e => e.target.style.background = 'rgba(255,255,255,0.2)'}
           >
-            🔄 Update GPS
+            🔄 Reset Hardware
           </button>
         </div>
 
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 950, margin: '0', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '3rem', fontWeight: 950, margin: '0', letterSpacing: '-0.02em', color: '#000000' }}>
             {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '8px', fontSize: '0.85rem' }}>
+          <p style={{ color: '#000000', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '8px', fontSize: '0.85rem' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -280,41 +251,41 @@ const AttendanceLog = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
           <button
             className="btn"
-            disabled={(currentRecord && currentRecord.status === 'on-duty') || clockLoading || !location.lat}
+            disabled={(currentRecord && currentRecord.status === 'on-duty') || clockLoading || hardwareStatus !== 'SCANNER_READY'}
             onClick={() => handleClockAction('in')}
             style={{
-              height: '56px', fontSize: '1rem', background: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
-              color: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.5)' : '#1B5E20',
-              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? 'not-allowed' : 'pointer',
+              height: '56px', fontSize: '1rem', background: hardwareStatus !== 'SCANNER_READY' || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+              color: hardwareStatus !== 'SCANNER_READY' || (currentRecord && currentRecord.status === 'on-duty') ? 'rgba(255,255,255,0.5)' : '#000000',
+              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: hardwareStatus !== 'SCANNER_READY' || (currentRecord && currentRecord.status === 'on-duty') ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.2s'
             }}
             onMouseOver={e => !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? null : e.target.style.background = 'white'}
             onMouseOut={e => !location.lat || (currentRecord && currentRecord.status === 'on-duty') ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
           >
-            <LogIn size={20} /> {!location.lat ? 'Waiting for GPS...' : (currentRecord && currentRecord.status === 'on-duty') ? 'Checked In' : 'Clock In'}
+            <LogIn size={20} /> {hardwareStatus !== 'SCANNER_READY' ? 'Connect Scanner' : (currentRecord && currentRecord.status === 'on-duty') ? 'Checked In' : 'Clock In'}
           </button>
           <button
             className="btn"
             disabled={(!currentRecord || currentRecord.status === 'off-duty') || clockLoading || !location.lat}
             onClick={() => handleClockAction('out')}
             style={{
-              height: '56px', fontSize: '1rem', background: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
-              color: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.5)' : '#1B5E20',
-              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? 'not-allowed' : 'pointer',
+              height: '56px', fontSize: '1rem', background: hardwareStatus !== 'SCANNER_READY' || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+              color: hardwareStatus !== 'SCANNER_READY' || (!currentRecord || currentRecord.status === 'off-duty') ? 'rgba(255,255,255,0.5)' : '#000000',
+              borderRadius: '14px', border: 'none', fontWeight: 900, cursor: hardwareStatus !== 'SCANNER_READY' || (!currentRecord || currentRecord.status === 'off-duty') ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.2s'
             }}
             onMouseOver={e => !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? null : e.target.style.background = 'white'}
             onMouseOut={e => !location.lat || (!currentRecord || currentRecord.status === 'off-duty') ? null : e.target.style.background = 'rgba(255,255,255,0.95)'}
           >
-            <LogOut size={20} /> {!location.lat ? 'Waiting for GPS...' : (currentRecord?.status === 'on-duty') ? 'Clock Out' : 'Not Clocked In'}
+            <LogOut size={20} /> {hardwareStatus !== 'SCANNER_READY' ? 'Connect Scanner' : (currentRecord?.status === 'on-duty') ? 'Clock Out' : 'Not Clocked In'}
           </button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>TOTAL SESSIONS</div>
@@ -322,7 +293,7 @@ const AttendanceLog = () => {
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>COLLECTIVE HOURS</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#A5D6A7' }}>{showBalances ? totalCalculatedHours : '••••••'} hrs</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#000000' }}>{showBalances ? totalCalculatedHours : '••••••'} hrs</div>
           </div>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>UNIQUE STAFF</div>
@@ -346,7 +317,7 @@ const AttendanceLog = () => {
                 placeholder="Search by staff name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', fontSize: '0.85rem', fontWeight: 700 }}
+                style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', fontSize: '0.85rem', fontWeight: 700, color: '#000000' }}
               />
               {searchTerm && (
                 <button
@@ -359,21 +330,21 @@ const AttendanceLog = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '0 12px', borderRadius: '12px', border: '1px solid #e2e8f0', height: '44px' }}>
-              <Calendar size={16} color="#1B5E20" />
+              <Calendar size={16} color="#32FC05" />
               <input
                 type="date"
                 value={filters.date}
                 onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                style={{ border: 'none', background: 'transparent', fontSize: '0.85rem', fontWeight: 700, outline: 'none', color: '#1B5E20', cursor: 'pointer' }}
+                style={{ border: 'none', background: 'transparent', fontSize: '0.85rem', fontWeight: 700, outline: 'none', color: '#000000', cursor: 'pointer' }}
               />
             </div>
 
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '0 12px', borderRadius: '12px', border: '1px solid #e2e8f0', height: '44px', position: 'relative' }}>
-              <Filter size={16} color="#1B5E20" />
+              <Filter size={16} color="#32FC05" />
               <select
                 value={filters.department}
                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-                style={{ border: 'none', background: 'transparent', fontSize: '0.85rem', fontWeight: 800, outline: 'none', cursor: 'pointer', color: '#1B5E20' }}
+                style={{ border: 'none', background: 'transparent', fontSize: '0.85rem', fontWeight: 800, outline: 'none', cursor: 'pointer', color: '#000000' }}
               >
                 <option value="">All Departments</option>
                 <option value="studio">Creative Studio</option>
@@ -389,7 +360,7 @@ const AttendanceLog = () => {
               onClick={() => setShowBalances(!showBalances)}
               style={{
                 padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px',
-                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20', display: 'flex', alignItems: 'center', gap: '6px'
+                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#000000', display: 'flex', alignItems: 'center', gap: '6px'
               }}
             >
               {showBalances ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -413,19 +384,19 @@ const AttendanceLog = () => {
                 }], `Attendance_Report_${new Date().toISOString().slice(0, 10)}`)}
                 emailSubject={`Attendance Log Report — ${new Date().toLocaleDateString()}`}
                 emailHtml={() => `<div style="font-family:Inter,sans-serif;max-width:700px;margin:0 auto">
-                  <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:20px;border-radius:12px;color:white;margin-bottom:16px">
+                  <div style="background:linear-gradient(135deg,#32FC05,#2E7D32);padding:20px;border-radius:12px;color:white;margin-bottom:16px">
                     <h2 style="margin:0">DRAVANUA HUB — Attendance Report</h2>
                     <p style="margin:6px 0 0;opacity:.8">Generated: ${new Date().toLocaleString()}</p>
                   </div>
                   <p><strong>Total Sessions:</strong> ${filteredLogs.length} &nbsp;|&nbsp; <strong>Unique Staff:</strong> ${uniqueStaffCount} &nbsp;|&nbsp; <strong>Total Hours:</strong> ${totalCalculatedHours}h</p>
                   <table style="width:100%;border-collapse:collapse">
-                    <thead><tr style="background:#1B5E20;color:white">
+                    <thead><tr style="background:#32FC05;color:white">
                       <th style="padding:8px;text-align:left">Date</th><th style="padding:8px;text-align:left">Staff</th><th style="padding:8px">Dept</th><th style="padding:8px">Hours</th><th style="padding:8px">Status</th>
                     </tr></thead>
                     <tbody>${filteredLogs.slice(0, 30).map((l, i) => `<tr style="background:${i % 2 === 0 ? '#fafff9' : 'white'}">
                       <td style="padding:8px">${l.date}</td><td style="padding:8px;font-weight:700">${l.userName}</td>
                       <td style="padding:8px;text-align:center">${l.department || '—'}</td>
-                      <td style="padding:8px;text-align:center;font-weight:700;color:#1B5E20">${l.totalHours || 0}h</td>
+                      <td style="padding:8px;text-align:center;font-weight:700;color:#32FC05">${l.totalHours || 0}h</td>
                       <td style="padding:8px;text-align:center">${l.clockOut ? 'Out' : 'On Duty'}</td>
                     </tr>`).join('')}</tbody>
                   </table>
@@ -440,7 +411,7 @@ const AttendanceLog = () => {
 
       {/* Attendance Table */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — ATTENDANCE & WORKFORCE RECORDS
@@ -451,21 +422,21 @@ const AttendanceLog = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1000px' }}>
             <thead>
-              <tr style={{ background: '#1B5E20' }}>
+              <tr style={{ background: '#32FC05' }}>
                 {['STAFF MEMBER', 'STAFF ID', 'DEPARTMENT', 'SHIFT TIMING', 'DURATION', 'VERIFICATION'].map(h => (
                   <th key={h} style={{
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: (h === 'DURATION' || h === 'VERIFICATION') ? 'center' : 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h}</th>
                 ))}
               </tr>
@@ -478,7 +449,7 @@ const AttendanceLog = () => {
                 }} className="hover-row">
                   <td style={{ padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, #32FC05, #32CD32)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.85rem' }}>
                         {log.userName?.charAt(0) || 'U'}
                       </div>
                       <div>
@@ -488,7 +459,7 @@ const AttendanceLog = () => {
                     </div>
                   </td>
                   <td style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '0.7rem', color: '#1B5E20', background: '#f0faf0', padding: '4px 10px', borderRadius: '6px', fontWeight: 900, fontFamily: 'monospace', border: '1px solid #dcfce7', width: 'fit-content' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#000000', background: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontWeight: 900, fontFamily: 'monospace', border: '1px solid #e2e8f0', width: 'fit-content' }}>
                       {log.staffCode || 'N/A'}
                     </div>
                   </td>
@@ -510,14 +481,14 @@ const AttendanceLog = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div>
                         <div style={{ fontSize: '0.55rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 900 }}>In</div>
-                        <div style={{ color: '#16a34a', fontWeight: 900, fontSize: '0.8rem' }}>
+                        <div style={{ color: '#000000', fontWeight: 900, fontSize: '0.8rem' }}>
                           {log.clockIn ? new Date(log.clockIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                         </div>
                       </div>
                       <div style={{ color: '#e2e8f0' }}>→</div>
                       <div>
                         <div style={{ fontSize: '0.55rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 900 }}>Out</div>
-                        <div style={{ color: log.clockOut ? '#dc2626' : '#94a3b8', fontWeight: 900, fontSize: '0.8rem' }}>
+                        <div style={{ color: log.clockOut ? '#000000' : '#94a3b8', fontWeight: 900, fontSize: '0.8rem' }}>
                           {log.clockOut ? new Date(log.clockOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'ON-DUTY'}
                         </div>
                       </div>
@@ -534,23 +505,14 @@ const AttendanceLog = () => {
                       )}
                     </div>
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    {log.gps_lat ? (
-                      <a
-                        href={`https://www.google.com/maps?q=${log.gps_lat},${log.gps_lon}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
-                          background: '#f0fdf4', color: '#166534', borderRadius: '50px', fontSize: '0.65rem',
-                          fontWeight: 900, textDecoration: 'none', border: '1px solid #dcfce7'
-                        }}
-                      >
-                        <MapPin size={12} /> VERIFIED
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: '0.65rem', color: '#cbd5e1', fontWeight: 800 }}>NOT RECORDED</span>
-                    )}
+                   <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
+                      background: '#f8fafc', color: '#000000', borderRadius: '50px', fontSize: '0.65rem',
+                      fontWeight: 900, border: '1px solid #e2e8f0'
+                    }}>
+                      <Activity size={12} color="#000000" /> BIOMETRIC VERIFIED
+                    </div>
                   </td>
                 </tr>
               )) : (

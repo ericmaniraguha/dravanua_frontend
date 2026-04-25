@@ -241,7 +241,7 @@ const ManageReceipts = () => {
     return (
       <div className="admin-page center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#1B5E20' }} />
+          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#32FC05' }} />
           <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b' }}>Loading vault documents...</p>
         </div>
       </div>
@@ -257,7 +257,7 @@ const ManageReceipts = () => {
 
       {/* ── Summary Cards ─────────────────────────────────────────────────── */}
       <div className="admin-card" style={{
-        background: 'linear-gradient(135deg, #1B5E20, #2E7D32)',
+        background: 'linear-gradient(135deg, #32FC05, #2E7D32)',
         color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem'
       }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
@@ -331,7 +331,7 @@ const ManageReceipts = () => {
             </select>
 
             {(searchTerm || filterCategory || filterStatus) && (
-              <div style={{ fontSize: '0.7rem', color: '#1B5E20', fontWeight: 800, padding: '6px 12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #dcfce7' }}>
+              <div style={{ fontSize: '0.7rem', color: '#32FC05', fontWeight: 800, padding: '6px 12px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #dcfce7' }}>
                 <Filter size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
                 {filteredReceipts.length} result{filteredReceipts.length !== 1 ? 's' : ''}
               </div>
@@ -342,7 +342,7 @@ const ManageReceipts = () => {
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button
               onClick={() => setShowBalances(!showBalances)}
-              style={{ padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#1B5E20', display: 'flex', alignItems: 'center', gap: '6px' }}
+              style={{ padding: '8px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, color: '#32FC05', display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               {showBalances ? <EyeOff size={15} /> : <EyeIcon size={15} />}
               {showBalances ? 'Hide' : 'Show'}
@@ -353,13 +353,13 @@ const ManageReceipts = () => {
               emailSubject="DRAVANUA HUB — Digital Vault Receipts Report"
               emailHtml={() => `
                 <div style="font-family:Inter,sans-serif;max-width:700px;margin:0 auto">
-                  <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:20px;border-radius:12px;color:white;margin-bottom:16px">
+                  <div style="background:linear-gradient(135deg,#32FC05,#2E7D32);padding:20px;border-radius:12px;color:white;margin-bottom:16px">
                     <h2 style="margin:0">DRAVANUA HUB — Vault Receipts Report</h2>
                     <p style="margin:6px 0 0;opacity:.8">Generated: ${new Date().toLocaleString()}</p>
                   </div>
                   <table style="width:100%;border-collapse:collapse">
                     <tr style="background:#f1f5f9"><td style="padding:12px;font-weight:800">Total Documents</td><td style="padding:12px">${receipts.length}</td></tr>
-                    <tr><td style="padding:12px;font-weight:800">Total Declared</td><td style="padding:12px;font-weight:900;color:#1B5E20">${totalAmount.toLocaleString()} RWF</td></tr>
+                    <tr><td style="padding:12px;font-weight:800">Total Declared</td><td style="padding:12px;font-weight:900;color:#32FC05">${totalAmount.toLocaleString()} RWF</td></tr>
                     <tr style="background:#f1f5f9"><td style="padding:12px;font-weight:800">Approved Amount</td><td style="padding:12px;font-weight:900;color:#166534">${approvedAmt.toLocaleString()} RWF</td></tr>
                     <tr><td style="padding:12px;font-weight:800">Pending Review</td><td style="padding:12px;color:#854d0e;font-weight:800">${pendingCount} document(s)</td></tr>
                   </table>
@@ -384,7 +384,7 @@ const ManageReceipts = () => {
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
 
         {/* Dark header bar */}
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA HUB — DROPBOX DIGITAL VAULT
@@ -395,7 +395,7 @@ const ManageReceipts = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
@@ -409,7 +409,7 @@ const ManageReceipts = () => {
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: h === 'ACTIONS' || h === 'AMOUNT' ? 'right' : 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h}</th>
                 ))}
               </tr>
@@ -432,7 +432,7 @@ const ManageReceipts = () => {
                     }} className="hover-row">
 
                       {/* S/N */}
-                      <td style={{ padding: '12px', fontWeight: 900, color: '#1B5E20', fontFamily: 'monospace' }}>
+                      <td style={{ padding: '12px', fontWeight: 900, color: '#32FC05', fontFamily: 'monospace' }}>
                         #{(currentPage - 1) * itemsPerPage + i + 1}
                       </td>
 
@@ -563,7 +563,7 @@ const ManageReceipts = () => {
               >
                 <ChevronLeft size={16} />
               </button>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1B5E20', padding: '0 4px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#32FC05', padding: '0 4px' }}>
                 {currentPage} / {pageCount}
               </span>
               <button
@@ -584,7 +584,7 @@ const ManageReceipts = () => {
           <div className="admin-modal" style={{ maxWidth: '680px', width: '95%', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '92vh', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
 
             {/* Modal header */}
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #32FC05, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Upload size={22} />
                 <div>
@@ -608,7 +608,7 @@ const ManageReceipts = () => {
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = '#32FC05'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   />
                 </div>
@@ -619,7 +619,7 @@ const ManageReceipts = () => {
                     value={formData.supplier_name}
                     onChange={e => setFormData({ ...formData, supplier_name: e.target.value })}
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = '#32FC05'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   />
                 </div>
@@ -634,7 +634,7 @@ const ManageReceipts = () => {
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: 'white' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = '#32FC05'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   >
                     <option value="">Select category…</option>
@@ -657,7 +657,7 @@ const ManageReceipts = () => {
                     value={formData.department_id}
                     onChange={e => setFormData({ ...formData, department_id: e.target.value })}
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none', background: 'white' }}
-                    onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                    onFocus={e => e.target.style.borderColor = '#32FC05'}
                     onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                   >
                     <option value="">Select department…</option>
@@ -692,7 +692,7 @@ const ManageReceipts = () => {
                       onChange={e => setFormData({ ...formData, amount: e.target.value })}
                       placeholder="0"
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontWeight: 900, fontSize: '1.05rem', outline: 'none' }}
-                      onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                      onFocus={e => e.target.style.borderColor = '#32FC05'}
                       onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     />
                   </div>
@@ -703,7 +703,7 @@ const ManageReceipts = () => {
                       value={formData.expense_date}
                       onChange={e => setFormData({ ...formData, expense_date: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
-                      onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                      onFocus={e => e.target.style.borderColor = '#32FC05'}
                       onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                     />
                   </div>
@@ -718,7 +718,7 @@ const ManageReceipts = () => {
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9rem', fontWeight: 700, outline: 'none', fontFamily: 'inherit', resize: 'vertical' }}
-                  onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                  onFocus={e => e.target.style.borderColor = '#32FC05'}
                   onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                 />
               </div>
@@ -734,7 +734,7 @@ const ManageReceipts = () => {
                   style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', background: 'white' }}
                 />
                 {file && (
-                  <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#1B5E20', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#32FC05', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckCircle size={14} /> {file.name}
                   </div>
                 )}
@@ -775,7 +775,7 @@ const ManageReceipts = () => {
           <div className="admin-modal" style={{ maxWidth: '640px', width: '95%', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
 
             {/* Modal header */}
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #1B5E20, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #32FC05, #32CD32)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Eye size={22} />
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>Document Intelligence Viewer</h3>
@@ -803,7 +803,7 @@ const ManageReceipts = () => {
                     <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {icon} {label}
                     </div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 900, color: highlight ? '#1B5E20' : '#0f172a' }}>{value}</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 900, color: highlight ? '#32FC05' : '#0f172a' }}>{value}</div>
                   </div>
                 ))}
               </div>
@@ -850,7 +850,7 @@ const ManageReceipts = () => {
                   download
                   target="_blank"
                   rel="noreferrer"
-                  style={{ height: '42px', padding: '0 20px', borderRadius: '10px', background: '#1B5E20', color: 'white', fontSize: '0.85rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+                  style={{ height: '42px', padding: '0 20px', borderRadius: '10px', background: '#32FC05', color: 'white', fontSize: '0.85rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
                 >
                   <Download size={16} /> Download Original
                 </a>

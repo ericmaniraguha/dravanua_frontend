@@ -49,7 +49,14 @@ const FinancialManagement = () => {
   const [exchangeRate, setExchangeRate] = useState(1300);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [showBalances, setShowBalances] = useState(true);
+  const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -67,7 +74,7 @@ const FinancialManagement = () => {
   const [departments, setDepartments] = useState([]);
 
   const [formData, setFormData] = useState({
-    type: 'income', category: '', customCategory: '', client: '', amount: '',
+    type: 'Revenue', category: '', customCategory: '', client: '', amount: '',
     method: 'Cash', financialInstitution: '', accountNumber: '', description: '', date: new Date().toISOString().split('T')[0],
     departmentId: ''
   });
@@ -75,9 +82,9 @@ const FinancialManagement = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const transResp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/finance`);
+      const transResp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/finance?start=${startDate}&end=${endDate}`);
       const transData = await transResp.json();
-      const analyticsResp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/analytics?period=all`);
+      const analyticsResp = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/analytics?period=all&start=${startDate}&end=${endDate}`);
       const analyticsResult = await analyticsResp.json();
 
       if (transData.success) setTransactions(transData.data);
@@ -88,7 +95,7 @@ const FinancialManagement = () => {
           periodIncome: summary.totalRevenue || 0,
           periodExpenses: summary.operationalExpenses || 0,
           netBalance: summary.netProfit || 0,
-          incomeCount: (transData.data || []).filter(t => t.type === 'Sale').length,
+          incomeCount: (transData.data || []).filter(t => t.type === 'Revenue').length,
           expenseCount: (transData.data || []).filter(t => t.type === 'Expense').length,
           pendingRevenue: summary.pendingRevenue || 0,
           pendingCount: summary.pendingCount || 0,
@@ -197,7 +204,7 @@ const FinancialManagement = () => {
     setIsDetailsModalOpen(true);
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [startDate, endDate]);
 
   const formatValue = (num) => {
     const cleanNum = parseFloat(num) || 0;
@@ -209,7 +216,34 @@ const FinancialManagement = () => {
     const matchesSearch = (t.client || '').toLowerCase().includes(searchTerm.toLowerCase()) || (t.category || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || (typeFilter === 'income' && t.type === 'Sale') || (typeFilter === 'expense' && t.type === 'Expense');
     return matchesSearch && matchesType;
+  }).sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let aVal = a[sortConfig.key];
+    let bVal = b[sortConfig.key];
+
+    if (sortConfig.key === 'date') {
+      aVal = new Date(aVal).getTime();
+      bVal = new Date(bVal).getTime();
+    } else if (sortConfig.key === 'amount') {
+      aVal = parseFloat(aVal) || 0;
+      bVal = parseFloat(bVal) || 0;
+    } else {
+      aVal = String(aVal || '').toLowerCase();
+      bVal = String(bVal || '').toLowerCase();
+    }
+
+    if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
   });
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
   const handlePrint = () => {
     const reportDate = new Date().toLocaleDateString();
@@ -279,8 +313,8 @@ const FinancialManagement = () => {
               <td>${t.category}</td>
               <td><span class="badge badge-blue">${t.paymentMethod}</span></td>
               <td>${t.recordedBy}</td>
-              <td style="text-align:right; font-weight:700; color: ${t.type === 'Sale' ? '#2E7D32' : '#c62828'}">
-                ${t.type === 'Sale' ? '+' : '-'}${formatValue(t.amount)}
+              <td style="text-align:right; font-weight:700; color: ${(t.type === 'Revenue' || t.type === 'Asset') ? '#2E7D32' : '#c62828'}">
+                ${(t.type === 'Revenue' || t.type === 'Asset') ? '+' : '-'}${formatValue(t.amount)}
               </td>
             </tr>
           `).join('')}
@@ -302,7 +336,7 @@ const FinancialManagement = () => {
     <div className="admin-page animate-fadeIn no-print-padding">
       <Header title="Financial Ledger & Treasury" subtitle="Consolidated studio accounts and multi-currency revenue streams." />
       
-      <div className="admin-card treasury-summary" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card treasury-summary" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div><div style={{ fontSize: '0.7rem', opacity: 0.8 }}>TOTAL TREASURY</div><div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{showBalances ? formatValue(summaryData.totalTreasury) : '••••••'}</div></div>
           <div><div style={{ fontSize: '0.7rem', opacity: 0.8 }}>INCOME</div><div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#A5D6A7' }}>{showBalances ? formatValue(summaryData.periodIncome) : '••••••'}</div></div>
@@ -317,19 +351,29 @@ const FinancialManagement = () => {
             <button onClick={() => { setEditingItem(null); setFormData({ ...formData, amount: '', client: '', description: '', customCategory: '' }); setIsRecordModalOpen(true); }} className="btn btn-primary"><Plus size={16} /> RECORD ENTRY</button>
             <button onClick={handlePrint} className="btn btn-outline"><PieChart size={16} /> AUDIT REPORT</button>
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <input type="text" placeholder="Search ledger..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #ddd' }} />
-            <select value={displayCurrency} onChange={e => setDisplayCurrency(e.target.value)} style={{ padding: '8px', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', padding: '4px 10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <Calendar size={14} className="text-muted" />
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} />
+              <span style={{ color: '#94a3b8', fontWeight: 900 }}>→</span>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '0.75rem', fontWeight: 600, color: '#334155' }} />
+            </div>
+            <div style={{ position: 'relative' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input type="text" placeholder="Search ledger..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ padding: '8px 12px 8px 30px', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid #ddd', minWidth: '200px' }} />
+            </div>
+            <select value={displayCurrency} onChange={e => setDisplayCurrency(e.target.value)} style={{ padding: '8px', borderRadius: '8px', fontSize: '0.8rem', border: '1px solid #ddd', fontWeight: 600 }}>
               <option value="RWF">RWF</option>
               <option value="USD">USD</option>
             </select>
+            <button onClick={() => fetchData()} className="btn-icon" style={{ background: '#f1f5f9' }}><RefreshCw size={16} className={loading ? 'spin' : ''} /></button>
           </div>
         </div>
 
         {/* Data Table — DRAVANUA STUDIO REPORT FORMAT */}
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
           
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
                 DRAVANUA STUDIO — FINANCIAL LEDGER {new Date().getFullYear()}
@@ -340,32 +384,47 @@ const FinancialManagement = () => {
             </div>
             <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
               <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-              <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+              <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
             </div>
           </div>
 
           <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '950px' }}>
               <thead>
-                <tr style={{ background: '#1B5E20' }}>
+                <tr style={{ background: '#32FC05' }}>
                   {[
-                    { label: 'DATE',          tip: 'Transaction Date' },
-                    { label: 'CLIENT',        tip: 'Client or Source' },
-                    { label: 'CATEGORY',      tip: 'Financial Category' },
-                    { label: 'METHOD',        tip: 'Payment Method' },
-                    { label: 'INSTITUTION',   tip: 'Bank / Telco' },
-                    { label: 'ACCOUNT NO.',   tip: 'Account Reference' },
-                    { label: 'VALUATION',     tip: 'Amount Processed' },
-                    { label: 'STAFF',         tip: 'Recorded By' },
-                    { label: 'ACTIONS',       tip: 'Modify Entry' }
+                    { label: 'DATE',          key: 'date', tip: 'Transaction Date' },
+                    { label: 'CLIENT',        key: 'client', tip: 'Client or Source' },
+                    { label: 'CATEGORY',      key: 'category', tip: 'Financial Category' },
+                    { label: 'METHOD',        key: 'paymentMethod', tip: 'Payment Method' },
+                    { label: 'INSTITUTION',   key: 'financialInstitution', tip: 'Bank / Telco' },
+                    { label: 'ACCOUNT NO.',   key: 'accountNumber', tip: 'Account Reference' },
+                    { label: 'RAW AMOUNT',    key: 'amount', tip: 'Amount Inserted' },
+                    { label: 'VALUATION',     key: 'amount', tip: 'Converted Valuation' },
+                    { label: 'STAFF',         key: 'recorded_by', tip: 'Recorded By' },
+                    { label: 'ACTIONS',       key: null, tip: 'Modify Entry' }
                   ].map(h => (
-                    <th key={h.label} title={h.tip} style={{
-                      padding: '10px 12px', color: 'white', fontWeight: 900,
-                      fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
-                      textAlign: (h.label === 'VALUATION' || h.label === 'ACTIONS' || h.label === 'STAFF') ? 'right' : 'left', 
-                      whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)'
-                    }}>{h.label}</th>
+                    <th 
+                      key={h.label} 
+                      title={h.tip}
+                      onClick={() => h.key && handleSort(h.key)}
+                      style={{
+                        padding: '10px 12px', color: 'white', fontWeight: 900,
+                        fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
+                        textAlign: (h.label === 'VALUATION' || h.label === 'ACTIONS' || h.label === 'STAFF' || h.label === 'RAW AMOUNT') ? 'right' : 'left', 
+                        whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
+                        background: 'linear-gradient(180deg, #32FC05, #166534)',
+                        cursor: h.key ? 'pointer' : 'default',
+                        userSelect: 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: (h.label === 'VALUATION' || h.label === 'ACTIONS' || h.label === 'STAFF' || h.label === 'RAW AMOUNT') ? 'flex-end' : 'flex-start', gap: '4px' }}>
+                        {h.label}
+                        {sortConfig.key === h.key && (
+                          sortConfig.direction === 'asc' ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />
+                        )}
+                      </div>
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -394,8 +453,11 @@ const FinancialManagement = () => {
                     </td>
                     <td style={{ padding: '12px', color: '#475569', fontWeight: 600, fontSize: '0.7rem' }}>{t.financialInstitution || '-'}</td>
                     <td style={{ padding: '12px', color: '#475569', fontWeight: 600, fontSize: '0.7rem', fontFamily: 'monospace' }}>{t.accountNumber || '-'}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: t.type === 'Sale' ? '#1B5E20' : '#dc2626' }}>
-                      {t.type === 'Sale' ? '+' : '-'}{formatValue(t.amount)}
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800, color: '#334155' }}>
+                      {parseFloat(t.amount).toLocaleString()} {t.currency || 'RWF'}
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: (t.type === 'Revenue' || t.type === 'Asset') ? '#32FC05' : '#dc2626' }}>
+                      {(t.type === 'Revenue' || t.type === 'Asset') ? '+' : '-'}{formatValue(t.amount)}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'right', color: '#64748b', fontWeight: 600, fontSize: '0.7rem' }}>{t.recordedBy}</td>
                     <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -418,7 +480,7 @@ const FinancialManagement = () => {
           <div className="admin-modal" style={{ maxWidth: '500px', padding: '1.25rem', borderRadius: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: '#1B5E20', color: 'white', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ background: '#32FC05', color: 'white', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Plus size={18} />
                 </div>
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>{editingItem ? 'Edit Transaction' : 'Record Transaction'}</h3>
@@ -436,9 +498,18 @@ const FinancialManagement = () => {
                       {departments.map(dept => (<option key={dept.id} value={dept.name}>{dept.name.toUpperCase()}</option>))}
                     </optgroup>
                     <optgroup label="General Finance">
-                      <option value="Payroll">Payroll</option>
+                      <option value="Payroll">Salaries & Payroll</option>
                       <option value="Rent">Rent & Utilities</option>
-                      <option value="Maintenance">Maintenance</option>
+                      <option value="Transport">Transport & Logistics</option>
+                      <option value="Electricity">Electricity & Water</option>
+                      {isSuper && (
+                        <>
+                          <option value="Inventory">Inventory / Stock</option>
+                          <option value="Equipment">Equipment / Fixed Assets</option>
+                          <option value="Loan">Loan / Liability</option>
+                          <option value="Investment">Equity / Investment</option>
+                        </>
+                      )}
                       <option value="Taxes">Taxes / Statutory</option>
                       <option value="Other">Other Operational</option>
                     </optgroup>
@@ -454,10 +525,17 @@ const FinancialManagement = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Type</label>
-                    <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
-                      <button type="button" onClick={() => setFormData({...formData, type: 'income'})} style={{ flex: 1, padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'income' ? '#1B5E20' : 'transparent', color: formData.type === 'income' ? 'white' : '#64748b' }}>INCOME</button>
-                      <button type="button" onClick={() => setFormData({...formData, type: 'expense'})} style={{ flex: 1, padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'expense' ? '#dc2626' : 'transparent', color: formData.type === 'expense' ? 'white' : '#64748b' }}>EXPENSE</button>
+                    <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Ledger Type</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${isSuper ? 3 : 2}, 1fr)`, gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
+                      <button type="button" onClick={() => setFormData({...formData, type: 'Revenue'})} style={{ padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'Revenue' ? '#32FC05' : 'transparent', color: formData.type === 'Revenue' ? 'white' : '#64748b' }}>REVENUE</button>
+                      <button type="button" onClick={() => setFormData({...formData, type: 'Expense'})} style={{ padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'Expense' ? '#dc2626' : 'transparent', color: formData.type === 'Expense' ? 'white' : '#64748b' }}>EXPENSE</button>
+                      {isSuper && (
+                        <>
+                          <button type="button" onClick={() => setFormData({...formData, type: 'Asset'})} style={{ padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'Asset' ? '#0891b2' : 'transparent', color: formData.type === 'Asset' ? 'white' : '#64748b' }}>ASSET</button>
+                          <button type="button" onClick={() => setFormData({...formData, type: 'Liability'})} style={{ padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'Liability' ? '#7c3aed' : 'transparent', color: formData.type === 'Liability' ? 'white' : '#64748b' }}>LIABILITY</button>
+                          <button type="button" onClick={() => setFormData({...formData, type: 'Equity'})} style={{ padding: '6px', borderRadius: '6px', border: 'none', fontSize: '0.65rem', fontWeight: 800, cursor: 'pointer', background: formData.type === 'Equity' ? '#d97706' : 'transparent', color: formData.type === 'Equity' ? 'white' : '#64748b' }}>EQUITY</button>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -486,7 +564,7 @@ const FinancialManagement = () => {
                       onChange={e => handleNumericChange('amount', e.target.value)}
                       className="form-input"
                       placeholder="0.00"
-                      style={{ padding: '8px', fontWeight: 900, color: '#1B5E20' }}
+                      style={{ padding: '8px', fontWeight: 900, color: '#32FC05' }}
                     />
                   </div>
                 </div>
@@ -523,7 +601,7 @@ const FinancialManagement = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
                 <button type="button" onClick={() => setIsRecordModalOpen(false)} className="btn btn-outline" style={{ padding: '10px', borderRadius: '10px' }}>CANCEL</button>
-                <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ padding: '10px', borderRadius: '10px', background: 'linear-gradient(135deg, #1B5E20, #2E7D32)' }}>
+                <button type="submit" disabled={isSubmitting} className="btn btn-primary" style={{ padding: '10px', borderRadius: '10px', background: 'linear-gradient(135deg, #32FC05, #2E7D32)' }}>
                   {isSubmitting ? <RefreshCw className="spin" size={16} /> : (editingItem ? 'UPDATE LEDGER' : 'CONFIRM ENTRY')}
                 </button>
               </div>
@@ -535,7 +613,7 @@ const FinancialManagement = () => {
       {isDetailsModalOpen && selectedTransaction && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '420px', padding: '0', borderRadius: '20px', overflow: 'hidden' }}>
-            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '1.5rem', color: 'white' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '1.5rem', color: 'white' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.1em' }}>Transaction Audit Entry</div>
@@ -549,8 +627,8 @@ const FinancialManagement = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div>
                   <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 900, textTransform: 'uppercase', marginBottom: '4px' }}>Valuation</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 1000, color: selectedTransaction.type === 'Sale' ? '#1B5E20' : '#dc2626' }}>
-                    {selectedTransaction.type === 'Sale' ? '+' : '-'}{formatValue(selectedTransaction.amount)}
+                  <div style={{ fontSize: '1.25rem', fontWeight: 1000, color: (selectedTransaction.type === 'Revenue' || selectedTransaction.type === 'Asset') ? '#32FC05' : '#dc2626' }}>
+                    {(selectedTransaction.type === 'Revenue' || selectedTransaction.type === 'Asset') ? '+' : '-'}{formatValue(selectedTransaction.amount)}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -606,7 +684,7 @@ const FinancialManagement = () => {
                 </div>
               </div>
 
-              <button onClick={() => setIsDetailsModalOpen(false)} className="btn btn-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#1B5E20', fontWeight: 800 }}>CLOSE AUDIT VIEW</button>
+              <button onClick={() => setIsDetailsModalOpen(false)} className="btn btn-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px', background: '#32FC05', fontWeight: 800 }}>CLOSE AUDIT VIEW</button>
             </div>
           </div>
         </div>

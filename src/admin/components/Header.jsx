@@ -144,7 +144,7 @@ const Header = ({ title, subtitle, searchQuery, onSearchChange }) => {
               animation: 'fadeInUp 0.2s ease', overflow: 'hidden'
             }}>
               {/* Header with Tabs */}
-              <div style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', padding: '0' }}>
+              <div style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', padding: '0' }}>
                 <div style={{ padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: 'white', fontWeight: 900, fontSize: '0.85rem' }}>Notification Hub</span>
                   <button onClick={() => setShowDropdown(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer' }}>
@@ -232,7 +232,7 @@ const Header = ({ title, subtitle, searchQuery, onSearchChange }) => {
               <div style={{ padding: '12px 18px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'right' }}>
                 <button
                   onClick={() => { setShowDropdown(false); navigate(activeTab === 'subscriptions' ? '/admin/subscriptions' : '/admin/reminders'); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#1B5E20', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#32FC05', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer' }}
                 >
                   Go to {activeTab === 'subscriptions' ? 'Subscriptions' : 'Reminders'} <ExternalLink size={12} />
                 </button>
@@ -255,7 +255,7 @@ const Header = ({ title, subtitle, searchQuery, onSearchChange }) => {
               <span className="admin-profile-name">{user?.name || 'Admin User'}</span>
             )}
             <span className="admin-profile-role" style={{
-              color: (user?.role === 'super_admin' || user?.role === 'service_admin') ? 'white' : '#1B5E20',
+              color: (user?.role === 'super_admin' || user?.role === 'service_admin') ? 'white' : '#32FC05',
               background: (user?.role === 'super_admin' || user?.role === 'service_admin') ? '#dc3545' : '#ffffff',
               padding: '2px 8px',
               borderRadius: '4px', fontWeight: 900, fontSize: '0.65rem'
@@ -266,7 +266,7 @@ const Header = ({ title, subtitle, searchQuery, onSearchChange }) => {
                   fontSize: '0.65rem', opacity: (user?.assignedService === 'all') ? 1 : 0.8,
                   fontWeight: (user?.assignedService === 'all') ? 900 : 500,
                   display: 'block', marginTop: '2px', textTransform: 'uppercase',
-                  background: (user?.assignedService === 'all') ? '#1B5E20' : 'transparent',
+                  background: (user?.assignedService === 'all') ? '#32FC05' : 'transparent',
                   color: (user?.assignedService === 'all') ? 'white' : 'inherit',
                   padding: (user?.assignedService === 'all') ? '1px 4px' : '0', borderRadius: '2px'
                 }}>

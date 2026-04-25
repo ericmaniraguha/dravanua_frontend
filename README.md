@@ -23,7 +23,7 @@ The frontend of DRAVANUA HUB is a modern, high-performance web application built
 
 The application uses a **Node-Specific Color Hierarchy** to aid administrative navigation. Each functional "node" (Department) has a unique visual identifier:
 
-*   **Studio Node**: `#1B5E20` (Deep Forest)
+*   **Studio Node**: `#32FC05` (Deep Forest)
 *   **Finance Node**: Emerald / Teal Gradient
 *   **Analytics Node**: Indigo / Slate
 *   **Operations Node**: Burnt Orange / Amber

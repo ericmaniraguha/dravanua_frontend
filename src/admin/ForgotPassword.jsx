@@ -107,7 +107,7 @@ const ForgotPassword = () => {
     <div className="admin-login-page" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6rem 1rem 4rem', background: 'transparent' }}>
       <div className="admin-login-card" style={{ maxWidth: '380px', padding: '1.75rem' }}>
         <div className="admin-login-header" style={{ marginBottom: '1rem' }}>
-          <div style={{ color: '#1B5E20', marginBottom: '0.4rem' }}>
+          <div style={{ color: '#32FC05', marginBottom: '0.4rem' }}>
             <ShieldAlert size={28} style={{ margin: '0 auto' }} />
           </div>
           <h1 style={{ fontSize: '1.25rem' }}>Recovery</h1>
@@ -335,7 +335,7 @@ const ForgotPassword = () => {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#1B5E20',
+                  color: '#32FC05',
                   fontSize: '0.75rem',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -351,7 +351,7 @@ const ForgotPassword = () => {
         {step === 3 && (
           <div style={{ textAlign: 'center' }}>
             <CheckCircle size={48} style={{ color: '#2e7d32', margin: '0 auto 1rem' }} />
-            <h3 style={{ fontSize: '1.1rem', color: '#1B5E20', marginBottom: '0.5rem', fontWeight: 600 }}>
+            <h3 style={{ fontSize: '1.1rem', color: '#32FC05', marginBottom: '0.5rem', fontWeight: 600 }}>
               Password Reset Successful
             </h3>
             <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '1.5rem', lineHeight: '1.5' }}>
@@ -365,7 +365,7 @@ const ForgotPassword = () => {
 
         {step !== 3 && (
           <div className="admin-login-footer" style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
-            <Link to="/admin/login" style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#1B5E20', fontWeight: 600 }}>
+            <Link to="/admin/login" style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#32FC05', fontWeight: 600 }}>
               <ArrowLeft size={14} /> Back to Login
             </Link>
           </div>

@@ -139,21 +139,21 @@ const ManageMarketing = () => {
         subtitle="Command center for your categories' advertising cards and promotional visuals."
       />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)', padding: '1.25rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(27,94,32,0.25)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', background: 'linear-gradient(135deg, #32FC05 0%, #2E7D32 100%)', padding: '1.25rem', borderRadius: '16px', boxShadow: '0 10px 25px rgba(27,94,32,0.25)' }}>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div className="admin-search">
-            <Search className="admin-search-icon" size={18} color="#1B5E20" />
+            <Search className="admin-search-icon" size={18} color="#32FC05" />
             <input 
               type="text" 
               placeholder="Search campaigns..." 
               className="admin-search-input" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ width: '300px', backgroundColor: 'rgba(255, 255, 255, 0.95)', border: 'none', color: '#1B5E20', borderRadius: '10px' }}
+              style={{ width: '300px', backgroundColor: 'rgba(255, 255, 255, 0.95)', border: 'none', color: '#32FC05', borderRadius: '10px' }}
             />
           </div>
         </div>
-        <button className="btn btn-lg" onClick={() => openModal()} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', color: '#1B5E20', border: 'none', fontWeight: 800 }}>
+        <button className="btn btn-lg" onClick={() => openModal()} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', color: '#32FC05', border: 'none', fontWeight: 800 }}>
           <Zap size={18} /> Create New Campaign
         </button>
       </div>
@@ -169,7 +169,7 @@ const ManageMarketing = () => {
                   onError={(e) => e.target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL'}
                 />
                 <div style={{ position: 'absolute', top: '15px', left: '15px', display: 'flex', gap: '6px' }}>
-                   <span className="badge" style={{ background: '#1B5E20', color: 'white', border: 'none', padding: '4px 12px', fontWeight: 800 }}>{asset.category.toUpperCase()}</span>
+                   <span className="badge" style={{ background: '#32FC05', color: 'white', border: 'none', padding: '4px 12px', fontWeight: 800 }}>{asset.category.toUpperCase()}</span>
                 </div>
                 <div style={{ position: 'absolute', bottom: '15px', right: '15px' }}>
                    {asset.isActive ? (

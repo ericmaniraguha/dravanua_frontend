@@ -244,7 +244,7 @@ const ManageReminders = () => {
               <button key={s} onClick={() => setStatusFilter(s)} style={{
                 padding: '7px 13px', borderRadius: '9px', border: 'none', fontSize: '0.7rem',
                 fontWeight: statusFilter === s ? 900 : 600, cursor: 'pointer',
-                background: statusFilter === s ? '#1B5E20' : '#f1f5f9',
+                background: statusFilter === s ? '#32FC05' : '#f1f5f9',
                 color: statusFilter === s ? 'white' : '#475569'
               }}>{s}</button>
             ))}
@@ -263,7 +263,7 @@ const ManageReminders = () => {
           )}
         </div>
         <button onClick={() => { setEditingItem(null); setFormData({ ...emptyForm }); setIsModalOpen(true); }}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px', border: 'none', fontSize: '0.8rem', fontWeight: 900, background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px', border: 'none', fontSize: '0.8rem', fontWeight: 900, background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', cursor: 'pointer' }}>
           <Plus size={16} /> New Reminder
         </button>
       </div>
@@ -271,7 +271,7 @@ const ManageReminders = () => {
       {/* Main Ledger Table */}
       <div className="admin-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
         {/* Report Header */}
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — REMINDER & SCHEDULE LEDGER {new Date().getFullYear()}
@@ -282,7 +282,7 @@ const ManageReminders = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB')}</div>
-            <div style={{ color: '#90EE90', marginTop: '3px' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ color: '#32FC05', marginTop: '3px' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
@@ -308,7 +308,7 @@ const ManageReminders = () => {
                     padding: '10px 12px', color: 'white', fontWeight: 900, fontSize: '0.6rem',
                     textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.08)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h.l}</th>
                 ))}
               </tr>
@@ -340,7 +340,7 @@ const ManageReminders = () => {
                       onMouseLeave={e => e.currentTarget.style.background = rowBg}
                     >
                       {/* ID */}
-                      <td style={{ ...tdSt, fontFamily: 'monospace', fontWeight: 900, fontSize: '0.65rem', color: '#1B5E20', whiteSpace: 'nowrap' }}>
+                      <td style={{ ...tdSt, fontFamily: 'monospace', fontWeight: 900, fontSize: '0.65rem', color: '#32FC05', whiteSpace: 'nowrap' }}>
                         REM-{String(r.id).padStart(4, '0')}
                       </td>
 
@@ -374,7 +374,7 @@ const ManageReminders = () => {
 
                       {/* Department */}
                       <td style={{ ...tdSt, fontSize: '0.7rem', color: '#475569', fontWeight: 700 }}>
-                        {r.sendToAll ? <span style={{ color: '#1B5E20', fontWeight: 800 }}>All Depts.</span> : (r.department || '—')}
+                        {r.sendToAll ? <span style={{ color: '#32FC05', fontWeight: 800 }}>All Depts.</span> : (r.department || '—')}
                       </td>
 
                       {/* Broadcast */}
@@ -478,7 +478,7 @@ const ManageReminders = () => {
                                     onChange={e => setRecipientEmail(e.target.value)}
                                     style={{ flex: 1, padding: '7px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.75rem', outline: 'none' }} />
                                   <button onClick={() => handleSendEmail(r)} disabled={sending === r.id}
-                                    style={{ padding: '7px 14px', background: '#1B5E20', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    style={{ padding: '7px 14px', background: '#32FC05', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.72rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <Send size={12} /> {sending === r.id ? 'Sending…' : 'Send'}
                                   </button>
                                 </div>
@@ -494,8 +494,8 @@ const ManageReminders = () => {
             </tbody>
             {filtered.length > 0 && (
               <tfoot>
-                <tr style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderTop: '2px solid #1B5E20' }}>
-                  <td colSpan={9} style={{ padding: '10px 12px', fontWeight: 800, fontSize: '0.7rem', color: '#1B5E20' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderTop: '2px solid #32FC05' }}>
+                  <td colSpan={9} style={{ padding: '10px 12px', fontWeight: 800, fontSize: '0.7rem', color: '#32FC05' }}>
                     TOTALS: {pendingCount} pending · {urgentCount} urgent · {dueTodayCount} due today · {completedCount} completed
                   </td>
                   <td colSpan={3} style={{ padding: '10px 12px', fontSize: '0.62rem', color: '#64748b', fontWeight: 700, textAlign: 'right' }}>
@@ -513,7 +513,7 @@ const ManageReminders = () => {
         <div className="admin-modal-overlay" onClick={e => { if (e.target === e.currentTarget) { setIsModalOpen(false); setEditingItem(null); } }}>
           <div className="admin-modal" style={{ maxWidth: '680px', maxHeight: '92vh', overflowY: 'auto' }}>
             {/* Modal header */}
-            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: 'white', fontWeight: 900, fontSize: '1rem' }}>
                   {editingItem ? 'Edit Reminder' : 'Create New Reminder'}
@@ -568,7 +568,7 @@ const ManageReminders = () => {
                 </div>
                 <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <input type="checkbox" checked={formData.sendToAll} onChange={e => setFormData({ ...formData, sendToAll: e.target.checked })} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
-                  <span style={{ fontWeight: 800, color: formData.sendToAll ? '#1B5E20' : '#94a3b8', fontSize: '0.78rem' }}>{formData.sendToAll ? 'YES' : 'NO'}</span>
+                  <span style={{ fontWeight: 800, color: formData.sendToAll ? '#32FC05' : '#94a3b8', fontSize: '0.78rem' }}>{formData.sendToAll ? 'YES' : 'NO'}</span>
                 </label>
               </div>
 

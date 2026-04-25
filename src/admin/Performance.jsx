@@ -43,7 +43,7 @@ const Performance = () => {
     setError(null);
 
     try {
-      const response = await secureFetch(import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/performance');
+      const response = await secureFetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/performance?start=${dateRange.start}&end=${dateRange.end}`);
       const data = await response.json();
 
       if (data.success) {
@@ -60,7 +60,7 @@ const Performance = () => {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [dateRange.start, dateRange.end]);
 
   useEffect(() => {
     fetchStats();
@@ -143,7 +143,7 @@ const Performance = () => {
 
       <div class="section-title">Operational Metrics</div>
       <div class="metrics-grid">
-        <div class="metric-card"><span class="metric-val" style="color:#1B5E20;">${totalIncome.toLocaleString()} RWF</span><span class="metric-lbl">TOTAL INCOME</span></div>
+        <div class="metric-card"><span class="metric-val" style="color:#32FC05;">${totalIncome.toLocaleString()} RWF</span><span class="metric-lbl">TOTAL INCOME</span></div>
         <div class="metric-card"><span class="metric-val" style="color:#dc2626;">${totalExpenses.toLocaleString()} RWF</span><span class="metric-lbl">TOTAL EXPENSES</span></div>
         <div class="metric-card"><span class="metric-val" style="color:#0f172a;">${(totalIncome - totalExpenses).toLocaleString()} RWF</span><span class="metric-lbl">NET CONTRIBUTION</span></div>
         <div class="metric-card"><span class="metric-val">${filteredDeptStats.length}</span><span class="metric-lbl">DEPARTMENTS</span></div>
@@ -161,7 +161,7 @@ const Performance = () => {
               <td><strong>${user.name}</strong></td>
               <td><span class="badge badge-blue">${(user.department || 'GENERAL').toUpperCase()}</span></td>
               <td><strong>${user.totalActions} Actions</strong></td>
-              <td style="text-align:right; font-weight:700; color:#1B5E20;">${eff}%</td>
+              <td style="text-align:right; font-weight:700; color:#32FC05;">${eff}%</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -177,7 +177,7 @@ const Performance = () => {
               <td><strong>${(dept.name || 'GENERAL').toUpperCase()}</strong></td>
               <td>${dept.staffCount} Staff</td>
               <td>${dept.totalActions} Actions</td>
-              <td style="color:#1B5E20; font-weight:700;">${(dept.income || 0).toLocaleString()} RWF</td>
+              <td style="color:#32FC05; font-weight:700;">${(dept.income || 0).toLocaleString()} RWF</td>
               <td style="text-align:right; font-weight:700;">${share}%</td>
             </tr>`;
           }).join('')}
@@ -225,7 +225,7 @@ const Performance = () => {
     return (
       <div className="admin-page center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#1B5E20' }} />
+          <RefreshCw size={32} className="spin" style={{ marginBottom: '1rem', color: '#32FC05' }} />
           <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748b' }}>Initializing Performance Suite...</p>
         </div>
       </div>
@@ -266,7 +266,7 @@ const Performance = () => {
       )}
 
       {/* Treasury Summary Cards */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #32FC05, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>TOTAL ACTIONS</div>
@@ -323,7 +323,7 @@ const Performance = () => {
               <button
                 className="btn btn-link"
                 onClick={clearFilters}
-                style={{ color: '#1B5E20', fontWeight: 700, fontSize: '0.8rem', padding: '0', textDecoration: 'underline', cursor: 'pointer', border: 'none', background: 'none' }}
+                style={{ color: '#32FC05', fontWeight: 700, fontSize: '0.8rem', padding: '0', textDecoration: 'underline', cursor: 'pointer', border: 'none', background: 'none' }}
               >
                 Clear all
               </button>
@@ -383,12 +383,12 @@ const Performance = () => {
               emailSubject={`Staff Performance Report — ${dateRange.start} to ${dateRange.end}`}
               emailHtml={() => `
                 <div style="font-family:Inter,sans-serif;max-width:700px;margin:0 auto">
-                  <div style="background:linear-gradient(135deg,#1B5E20,#2E7D32);padding:24px;border-radius:12px;color:white;margin-bottom:20px">
+                  <div style="background:linear-gradient(135deg,#32FC05,#2E7D32);padding:24px;border-radius:12px;color:white;margin-bottom:20px">
                     <h1 style="margin:0;font-size:20px">DRAVANUA HUB — Staff Performance Report</h1>
                     <p style="margin:8px 0 0;opacity:.8">Period: ${dateRange.start} to ${dateRange.end}</p>
                   </div>
                   <table style="width:100%;border-collapse:collapse">
-                    <thead><tr style="background:#1B5E20;color:white">
+                    <thead><tr style="background:#32FC05;color:white">
                       <th style="padding:10px;text-align:left">Name</th>
                       <th style="padding:10px;text-align:left">Department</th>
                       <th style="padding:10px;text-align:right">Actions</th>
@@ -422,7 +422,7 @@ const Performance = () => {
           boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
+            background: 'linear-gradient(135deg, #32FC05 0%, #2E7D32 100%)',
             padding: '0.85rem 1.5rem',
             display: 'flex',
             alignItems: 'center',
@@ -442,7 +442,7 @@ const Performance = () => {
                 fontSize: '0.65rem', fontWeight: 900, color: '#64748b',
                 textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px'
               }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#1B5E20', display: 'inline-block' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#32FC05', display: 'inline-block' }} />
                 Department
               </label>
               <div style={{ position: 'relative' }}>
@@ -463,7 +463,7 @@ const Performance = () => {
                     cursor: 'pointer',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={e => e.target.style.borderColor = '#1B5E20'}
+                  onFocus={e => e.target.style.borderColor = '#32FC05'}
                   onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                 >
                   <option value="all">All Departments</option>
@@ -575,7 +575,7 @@ const Performance = () => {
 
       {/* Departmental Performance */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — DEPARTMENTAL STRATEGIC PERFORMANCE
@@ -586,21 +586,21 @@ const Performance = () => {
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '950px' }}>
             <thead>
-              <tr style={{ background: '#1B5E20' }}>
+              <tr style={{ background: '#32FC05' }}>
                 {['DEPARTMENT UNIT', 'EXECUTIVES', 'ACTIVITY VOL.', 'INCOME (RWF)', 'EXPENSES (RWF)', 'NET CONTRIBUTION'].map(h => (
                   <th key={h} style={{
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: (h.includes('EXECUTIVES') || h.includes('VOL.') || h.includes('INCOME') || h.includes('EXPENSES') || h.includes('NET')) ? 'right' : 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h}</th>
                 ))}
               </tr>
@@ -621,9 +621,9 @@ const Performance = () => {
                     <td style={{ padding: '12px', fontWeight: 900, color: '#0f172a' }}>{(dept.name || 'GENERAL').toUpperCase()}</td>
                     <td style={{ padding: '12px', textAlign: 'right', fontWeight: 700 }}>{dept.staffCount || 0}</td>
                     <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800 }}>{dept.totalActions || 0}</td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#1B5E20' }}>{(dept.income || 0).toLocaleString()}</td>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#32FC05' }}>{(dept.income || 0).toLocaleString()}</td>
                     <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800, color: '#dc2626' }}>({(dept.expenses || 0).toLocaleString()})</td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 950, color: ((dept.income || 0) - (dept.expenses || 0)) >= 0 ? '#1B5E20' : '#dc2626' }}>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 950, color: ((dept.income || 0) - (dept.expenses || 0)) >= 0 ? '#32FC05' : '#dc2626' }}>
                       {((dept.income || 0) - (dept.expenses || 0)).toLocaleString()}
                     </td>
                   </tr>
@@ -636,7 +636,7 @@ const Performance = () => {
 
       {/* Staff Productivity Table */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white', marginBottom: '2rem' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — STAFF PRODUCTIVITY RANKING
@@ -653,21 +653,21 @@ const Performance = () => {
               {showBalances ? <EyeOff size={12} style={{ display: 'inline', marginRight: '4px' }} /> : <Eye size={12} style={{ display: 'inline', marginRight: '4px' }} />}
               {showBalances ? 'Hide' : 'Show'}
             </button>
-            <div style={{ color: '#90EE90', marginTop: '3px' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ color: '#32FC05', marginTop: '3px' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1100px' }}>
             <thead>
-              <tr style={{ background: '#1B5E20' }}>
+              <tr style={{ background: '#32FC05' }}>
                 {['STAFF NAME', 'DEPARTMENT', 'SALES', 'INCOME (RWF)', 'EXPENSES', 'VOLUME', 'EFFICIENCY', 'ACTIONS'].map(h => (
                   <th key={h} style={{
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: (h === 'EFFICIENCY' || h === 'VOLUME' || h === 'INCOME (RWF)' || h === 'EXPENSES') ? 'right' : 'left',
                     whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h}</th>
                 ))}
               </tr>
@@ -700,16 +700,16 @@ const Performance = () => {
                           {(user.department || 'GENERAL').toUpperCase()}
                         </span>
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#1B5E20' }}>{user.sales || 0}</td>
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#32FC05' }}>{user.sales || 0}</td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: 900, color: '#0f172a' }}>{showBalances ? (user.income || 0).toLocaleString() : '••••••'}</td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800, color: '#dc2626' }}>{showBalances ? `(${(user.expenses || 0).toLocaleString()})` : '••••••'}</td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: 800 }}>{user.totalActions}</td>
                       <td style={{ padding: '12px', textAlign: 'right' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                           <div style={{ width: '40px', height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${efficiency}%`, background: '#1B5E20', borderRadius: '3px' }} />
+                            <div style={{ height: '100%', width: `${efficiency}%`, background: '#32FC05', borderRadius: '3px' }} />
                           </div>
-                          <span style={{ fontWeight: 800, color: '#1B5E20', minWidth: '30px' }}>{Math.round(efficiency)}%</span>
+                          <span style={{ fontWeight: 800, color: '#32FC05', minWidth: '30px' }}>{Math.round(efficiency)}%</span>
                         </div>
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right' }}>
@@ -721,7 +721,7 @@ const Performance = () => {
                             padding: '6px 10px',
                             background: '#f0fdf4',
                             border: '1px solid #dcfce7',
-                            color: '#1B5E20',
+                            color: '#32FC05',
                             borderRadius: '6px',
                             cursor: 'pointer',
                             fontSize: '0.65rem',
@@ -750,31 +750,31 @@ const Performance = () => {
 
       {/* Live Activity Stream */}
       <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #32FC05)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>
               DRAVANUA STUDIO — LIVE ACTIVITY AUDIT STREAM
             </div>
             <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '0.06em' }}>
-              REAL-TIME OPERATIONAL TRACKING · {filteredLogs.length} ENTRIES {autoRefresh && <span style={{ color: '#90EE90', fontWeight: 900 }}>● LIVE</span>}
+              REAL-TIME OPERATIONAL TRACKING · {filteredLogs.length} ENTRIES {autoRefresh && <span style={{ color: '#32FC05', fontWeight: 900 }}>● LIVE</span>}
             </div>
           </div>
           <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
             <div>Generated: {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
-            <div style={{ marginTop: '3px', color: '#90EE90' }}>CONFIDENTIAL — INTERNAL USE</div>
+            <div style={{ marginTop: '3px', color: '#32FC05' }}>CONFIDENTIAL — INTERNAL USE</div>
           </div>
         </div>
 
         <div className="admin-table-wrapper" style={{ overflowX: 'auto', maxHeight: '500px', overflowY: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '900px' }}>
             <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-              <tr style={{ background: '#1B5E20' }}>
+              <tr style={{ background: '#32FC05' }}>
                 {['TIMESTAMP', 'EXECUTIVE', 'DEPARTMENT', 'ACTION', 'DETAILS'].map(h => (
                   <th key={h} style={{
                     padding: '10px 12px', color: 'white', fontWeight: 900,
                     fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.06em',
                     textAlign: 'left', whiteSpace: 'nowrap', borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'linear-gradient(180deg, #1B5E20, #166534)'
+                    background: 'linear-gradient(180deg, #32FC05, #166534)'
                   }}>{h}</th>
                 ))}
               </tr>

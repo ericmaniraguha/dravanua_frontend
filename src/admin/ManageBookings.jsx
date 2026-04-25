@@ -45,6 +45,13 @@ const ManageBookings = () => {
   const [locationInputType, setLocationInputType] = useState('preset');
   const [editMode, setEditMode] = useState(false);
   const [receiptFile, setReceiptFile] = useState(null);
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30); // Default to last 30 days for bookings
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [sortConfig, setSortConfig] = useState({ key: 'bookingDate', direction: 'desc' });
   
   const [formData, setFormData] = useState({
     customerName: '',
@@ -70,9 +77,13 @@ const ManageBookings = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const url = isSuper 
-        ? import.meta.env.VITE_API_BASE_URL + '/api/v1/admin/bookings' 
-        : `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/bookings?service=${userDeptFormatted}`;
+      const params = new URLSearchParams({
+        start: startDate,
+        end: endDate
+      });
+      if (!isSuper) params.append('service', userDeptFormatted);
+      
+      const url = `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/bookings?${params.toString()}`;
       
       const response = await secureFetch(url);
       const data = await response.json();
@@ -94,7 +105,7 @@ const ManageBookings = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [startDate, endDate]);
 
   const roleFilteredBookings = React.useMemo(() => {
     if (isSuper) return allBookings;
@@ -103,7 +114,7 @@ const ManageBookings = () => {
 
   useEffect(() => {
     filterBookings();
-  }, [activeService, activeCurrency, searchTerm, roleFilteredBookings]);
+  }, [activeService, activeCurrency, searchTerm, startDate, endDate, roleFilteredBookings, sortConfig]);
 
   const filterBookings = () => {
     let filtered = [...roleFilteredBookings];
@@ -127,7 +138,36 @@ const ManageBookings = () => {
       );
     }
 
+    if (startDate) {
+      filtered = filtered.filter(b => new Date(b.bookingDate) >= new Date(startDate));
+    }
+    if (endDate) {
+      filtered = filtered.filter(b => new Date(b.bookingDate) <= new Date(endDate + 'T23:59:59'));
+    }
+
+    // Apply Sorting
+    filtered.sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      if (sortConfig.key === 'bookingDate') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
     setBookings(filtered);
+  };
+
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
 
   const updateStatus = async (id, status) => {
@@ -292,17 +332,17 @@ const ManageBookings = () => {
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #1B5E20; padding-bottom: 20px; }
-          .logo { font-size: 28px; font-weight: 900; color: #1B5E20; margin-bottom: 5px; }
+          .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid var(--primary-dark); padding-bottom: 20px; }
+          .logo { font-size: 28px; font-weight: 900; color: var(--primary-dark); margin-bottom: 5px; }
           .tagline { font-size: 14px; color: #64748b; font-style: italic; }
-          .booking-id { font-size: 24px; font-weight: 800; color: #1B5E20; margin: 20px 0; }
+          .booking-id { font-size: 24px; font-weight: 800; color: var(--primary-dark); margin: 20px 0; }
           .section { margin: 30px 0; padding: 20px; background: #f8fafc; border-radius: 12px; }
-          .section-title { font-size: 16px; font-weight: 800; color: #1B5E20; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .section-title { font-size: 16px; font-weight: 800; color: var(--primary-dark); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
           .info-item { padding: 10px 0; }
           .info-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
           .info-value { font-size: 14px; font-weight: 600; color: #1e293b; }
-          .stats-summary { background: linear-gradient(135deg, #1B5E20, #2E7D32); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; }
+          .stats-summary { background: linear-gradient(135deg, var(--primary-dark), var(--secondary)); color: white; padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; }
           .stats-item { display: inline-block; margin: 0 20px; }
           .stats-value { font-size: 32px; font-weight: 900; display: block; }
           .stats-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; }
@@ -397,8 +437,8 @@ const ManageBookings = () => {
         </div>
 
         <div class="no-print" style="text-align: center; margin-top: 30px;">
-          <button onclick="window.print()" style="background: #1B5E20; color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; margin-right: 10px;">PRINT REPORT</button>
-          <button onclick="window.close()" style="background: white; color: #1B5E20; border: 2px solid #1B5E20; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer;">CLOSE</button>
+          <button onclick="window.print()" style="background: var(--primary-dark); color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; margin-right: 10px;">PRINT REPORT</button>
+          <button onclick="window.close()" style="background: white; color: var(--primary-dark); border: 2px solid var(--primary-dark); padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer;">CLOSE</button>
         </div>
       </body>
       </html>
@@ -452,7 +492,7 @@ const ManageBookings = () => {
               <td style="font-weight:700">${b.clientName || b.customerName || '—'}</td>
               <td><span class="badge badge-blue">${b.service || b.serviceType || 'General'}</span></td>
               <td style="font-size:10px">${new Date(b.date || b.bookingDate).toLocaleDateString()}</td>
-              <td style="text-align:right; font-weight:900; color:#1B5E20">${fmtAmt(b.totalAmount || 0, currency)}</td>
+              <td style="text-align:right; font-weight:900; color:var(--primary-dark)">${fmtAmt(b.totalAmount || 0, currency)}</td>
             </tr>`).join('')}
         </tbody>
       </table>`;
@@ -489,7 +529,7 @@ const ManageBookings = () => {
       />
 
       {/* ── Summary Stats ─────────────────────────────────────────────── */}
-      <div className="admin-card" style={{ background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
+      <div className="admin-card" style={{ background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', padding: '2rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
           <div>
             <div style={{ fontSize: '0.7rem', opacity: 0.8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>TOTAL BOOKINGS</div>
@@ -515,21 +555,43 @@ const ManageBookings = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
           {/* Left Actions */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div className="admin-search" style={{ width: '280px', position: 'relative' }}>
+            <div className="admin-search" style={{ width: '220px', position: 'relative' }}>
               <Search style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} size={14} />
               <input 
                 type="text" 
-                placeholder="Search bookings..." 
+                placeholder="Search..." 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.75rem', fontWeight: 600, outline: 'none' }}
               />
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '4px 10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <Calendar size={14} color="var(--primary-dark)" />
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={e => setStartDate(e.target.value)}
+                style={{ border: 'none', background: 'transparent', fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary-dark)', outline: 'none' }}
+              />
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>—</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={e => setEndDate(e.target.value)}
+                style={{ border: 'none', background: 'transparent', fontSize: '0.7rem', fontWeight: 700, color: 'var(--primary-dark)', outline: 'none' }}
+              />
+              {(startDate || endDate) && (
+                <button onClick={() => { setStartDate(''); setEndDate(''); }} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '2px' }}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
             <button 
               onClick={() => setIsModalOpen(true)} 
               style={{ 
-                height: '38px', padding: '0 16px', borderRadius: '10px', background: '#1B5E20', color: 'white', border: 'none',
+                height: '38px', padding: '0 16px', borderRadius: '10px', background: 'var(--primary-dark)', color: 'white', border: 'none',
                 fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'
               }}
             >
@@ -548,7 +610,7 @@ const ManageBookings = () => {
                     padding: '6px 12px', border: 'none', background: activeService === s ? 'white' : 'transparent',
                     borderRadius: '8px', cursor: 'pointer', fontSize: '0.65rem', fontWeight: 900,
                     boxShadow: activeService === s ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', 
-                    color: activeService === s ? '#1B5E20' : '#64748b'
+                    color: activeService === s ? 'var(--primary-dark)' : '#64748b'
                   }}
                 >
                   {s.toUpperCase()}
@@ -559,7 +621,7 @@ const ManageBookings = () => {
             <select 
               value={activeCurrency} 
               onChange={(e) => setActiveCurrency(e.target.value)}
-              style={{ height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '0 10px', fontSize: '0.72rem', fontWeight: 900, background: 'white', color: '#1B5E20', cursor: 'pointer' }}
+              style={{ height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '0 10px', fontSize: '0.72rem', fontWeight: 900, background: 'white', color: 'var(--primary-dark)', cursor: 'pointer' }}
             >
               <option value="All">ALL CURR</option>
               <option value="RWF">RWF</option>
@@ -587,7 +649,7 @@ const ManageBookings = () => {
 
             <button 
               onClick={fetchBookings}
-              style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1B5E20' }}
+              style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-dark)' }}
             >
               <RefreshCw size={14} className={loading ? 'spin' : ''} />
             </button>
@@ -599,7 +661,7 @@ const ManageBookings = () => {
       {/* Data Table */}
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '4rem', background: 'white', borderRadius: '24px' }}>
-          <Loader2 size={32} className="spin-animation" style={{ color: '#1B5E20' }} />
+          <Loader2 size={32} className="spin-animation" style={{ color: 'var(--primary-dark)' }} />
           <span style={{ marginLeft: '1rem', fontSize: '0.9rem', color: '#64748b', fontWeight: 800 }}>Loading bookings...</span>
         </div>
       ) : bookings.length === 0 ? (
@@ -612,13 +674,13 @@ const ManageBookings = () => {
         </div>
       ) : (
         <div style={{ padding: 0, overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: '16px', background: 'white' }}>
-          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.04em' }}>RESERVATION LEDGER</div>
               <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px' }}>OPERATIONAL AUDIT · {bookings.length} RECORDS</div>
             </div>
             <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem', fontWeight: 700 }}>
-              <div style={{ color: '#90EE90' }}>CONFIDENTIAL</div>
+              <div style={{ color: '#32FC05' }}>CONFIDENTIAL</div>
             </div>
           </div>
 
@@ -626,14 +688,36 @@ const ManageBookings = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.73rem', minWidth: '1000px' }}>
               <thead>
                 <tr>
-                  {['BOOKING / CLIENT', 'SERVICE', 'DATE', 'PAYMENT', 'BALANCE', 'METHOD', 'STATUS', 'ACTIONS'].map((h, i) => (
-                    <th key={h} style={{
-                      padding: '12px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
-                      textTransform: 'uppercase', letterSpacing: '0.06em',
-                      textAlign: (h === 'PAYMENT' || h === 'BALANCE') ? 'right' : (h === 'ACTIONS' ? 'center' : 'left'),
-                      background: 'linear-gradient(180deg, #1B5E20, #166534)',
-                      borderRight: i < 7 ? '1px solid rgba(255,255,255,0.1)' : 'none'
-                    }}>{h}</th>
+                  {[
+                    { label: 'BOOKING / CLIENT', key: 'customerName' },
+                    { label: 'SERVICE', key: 'serviceType' },
+                    { label: 'DATE', key: 'bookingDate' },
+                    { label: 'PAYMENT', key: 'amountPaid', align: 'right' },
+                    { label: 'BALANCE', key: 'balance', align: 'right' },
+                    { label: 'METHOD', key: 'paymentMethod' },
+                    { label: 'STATUS', key: 'status' },
+                    { label: 'ACTIONS', key: null, align: 'center' }
+                  ].map((h, i) => (
+                    <th 
+                      key={h.label} 
+                      onClick={() => h.key && handleSort(h.key)}
+                      style={{
+                        padding: '12px 14px', color: 'white', fontWeight: 900, fontSize: '0.62rem',
+                        textTransform: 'uppercase', letterSpacing: '0.06em',
+                        textAlign: h.align || 'left',
+                        background: 'linear-gradient(180deg, var(--primary-dark), #166534)',
+                        borderRight: i < 7 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                        cursor: h.key ? 'pointer' : 'default',
+                        userSelect: 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: h.align === 'right' ? 'flex-end' : (h.align === 'center' ? 'center' : 'flex-start'), gap: '4px' }}>
+                        {h.label}
+                        {sortConfig.key === h.key && (
+                          sortConfig.direction === 'asc' ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />
+                        )}
+                      </div>
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -666,7 +750,7 @@ const ManageBookings = () => {
                         <div style={{ fontSize: '0.6rem', color: '#94a3b8' }}>{new Date(b.bookingDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                       </td>
                       <td style={{ padding: '12px 14px', textAlign: 'right' }}>
-                        <div style={{ fontWeight: 900, color: '#1B5E20', fontSize: '0.78rem' }}>{paid.toLocaleString()} {bookingCurrency}</div>
+                        <div style={{ fontWeight: 900, color: 'var(--primary-dark)', fontSize: '0.78rem' }}>{paid.toLocaleString()} {bookingCurrency}</div>
                         <div style={{ fontSize: '0.6rem', color: '#94a3b8' }}>OF {total.toLocaleString()}</div>
                       </td>
                       <td style={{ padding: '12px 14px', textAlign: 'right' }}>
@@ -695,7 +779,7 @@ const ManageBookings = () => {
                       </td>
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                          <button onClick={() => handleEdit(b)} title="Edit" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#1B5E20', cursor: 'pointer' }}><Edit size={14} /></button>
+                          <button onClick={() => handleEdit(b)} title="Edit" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: 'var(--primary-dark)', cursor: 'pointer' }}><Edit size={14} /></button>
                           <button onClick={() => openMessageCenter(b)} title="Message" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#d97706', cursor: 'pointer' }}><Mail size={14} /></button>
                           <button onClick={() => { setSelectedBooking(b); setIsDetailsOpen(true); }} title="Details" style={{ padding: '6px', borderRadius: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', cursor: 'pointer' }}><Info size={14} /></button>
                         </div>
@@ -713,7 +797,7 @@ const ManageBookings = () => {
       {isModalOpen && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '1000px', width: '95%', borderRadius: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, #1B5E20)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.75rem', background: 'linear-gradient(135deg, #0D3B0D, var(--primary-dark))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 {editMode ? <Edit size={22} /> : <ShoppingBag size={22} />}
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900 }}>
@@ -731,7 +815,7 @@ const ManageBookings = () => {
             <form onSubmit={handleManualEntry} style={{ padding: '1.75rem', overflowY: 'auto', flex: 1 }}>
               {/* Customer Info */}
               <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#1B5E20', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary-dark)', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
                   👤 Customer Information
                 </div>
 
@@ -788,7 +872,7 @@ const ManageBookings = () => {
 
               {/* Booking Details */}
               <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#1B5E20', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary-dark)', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
                   📅 Booking Details
                 </div>
 
@@ -835,7 +919,7 @@ const ManageBookings = () => {
                           padding: '4px 10px', 
                           fontSize: '0.6rem', 
                           border: 'none', 
-                          background: locationInputType === 'preset' ? '#1B5E20' : 'transparent',
+                          background: locationInputType === 'preset' ? 'var(--primary-dark)' : 'transparent',
                           color: locationInputType === 'preset' ? 'white' : '#64748b',
                           borderRadius: '4px',
                           cursor: 'pointer',
@@ -851,7 +935,7 @@ const ManageBookings = () => {
                           padding: '4px 10px', 
                           fontSize: '0.6rem', 
                           border: 'none', 
-                          background: locationInputType === 'custom' ? '#1B5E20' : 'transparent',
+                          background: locationInputType === 'custom' ? 'var(--primary-dark)' : 'transparent',
                           color: locationInputType === 'custom' ? 'white' : '#64748b',
                           borderRadius: '4px',
                           cursor: 'pointer',
@@ -876,13 +960,13 @@ const ManageBookings = () => {
                     </select>
                   ) : (
                     <div style={{ position: 'relative' }}>
-                      <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#1B5E20' }} />
+                      <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary-dark)' }} />
                       <input 
                         type="text" 
                         value={formData.customLocation} 
                         onChange={e => setFormData({...formData, customLocation: e.target.value})} 
                         placeholder="Enter customer location..."
-                        style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '10px', border: '1px solid #1B5E20', fontSize: '0.9rem', background: '#f0fdf4' }}
+                        style={{ width: '100%', padding: '10px 14px 10px 38px', borderRadius: '10px', border: '1px solid var(--primary-dark)', fontSize: '0.9rem', background: '#f0fdf4' }}
                       />
                     </div>
                   )}
@@ -891,7 +975,7 @@ const ManageBookings = () => {
 
               {/* Financial Section */}
               <div style={{ marginBottom: '2rem', padding: '1.25rem', background: '#fcfdfc', border: '1px solid #efefef', borderRadius: '14px' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 900, color: '#1B5E20', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary-dark)', textTransform: 'uppercase', marginBottom: '1rem' }}>
                   💰 Financial Details
                 </div>
 
@@ -930,7 +1014,7 @@ const ManageBookings = () => {
                       value={formData.amountPaid} 
                       onChange={e => setFormData({...formData, amountPaid: e.target.value})} 
                       placeholder="0" 
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #1B5E20', fontWeight: 900, fontSize: '1.1rem', color: '#1B5E20' }} 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--primary-dark)', fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary-dark)' }} 
                     />
                   </div>
                 </div>
@@ -950,7 +1034,7 @@ const ManageBookings = () => {
 
               {/* Additional Info */}
               <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: '#1B5E20', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--primary-dark)', textTransform: 'uppercase', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', letterSpacing: '0.03em' }}>
                   📝 Additional Information
                 </div>
 
@@ -1057,7 +1141,7 @@ const ManageBookings = () => {
                   type="submit" 
                   disabled={isSaving} 
                   style={{ 
-                    background: '#1B5E20', 
+                    background: 'var(--primary-dark)', 
                     color: 'white', 
                     border: 'none', 
                     padding: '12px 36px', 
@@ -1088,7 +1172,7 @@ const ManageBookings = () => {
       {isDetailsOpen && selectedBooking && (
         <div className="admin-modal-overlay">
           <div className="admin-modal" style={{ maxWidth: '550px', width: '90%', borderRadius: '24px', overflow: 'hidden', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, #1B5E20, #2E7D32)', color: 'white', flexShrink: 0 }}>
+            <div style={{ padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, var(--primary-dark), var(--secondary))', color: 'white', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontSize: '0.65rem', fontWeight: 900, opacity: 0.8, textTransform: 'uppercase', marginBottom: '6px' }}>Booking Details</div>
@@ -1127,7 +1211,7 @@ const ManageBookings = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>
                     <DollarSign size={12} /> Total
                   </div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1B5E20' }}>{(selectedBooking.totalAmount || 0).toLocaleString()} {selectedBooking.currency || 'RWF'}</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary-dark)' }}>{(selectedBooking.totalAmount || 0).toLocaleString()} {selectedBooking.currency || 'RWF'}</div>
                 </div>
                 <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>
@@ -1167,7 +1251,7 @@ const ManageBookings = () => {
                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8' }}>HANDLED BY: {selectedBooking.handledByAdminName || 'SYSTEM'}</span>
                 <button 
                   onClick={() => setIsDetailsOpen(false)} 
-                  style={{ background: '#1B5E20', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+                  style={{ background: 'var(--primary-dark)', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
                 >
                   CLOSE
                 </button>
