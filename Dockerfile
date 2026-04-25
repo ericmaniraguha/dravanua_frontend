@@ -25,8 +25,8 @@ RUN apk add --no-cache curl
 # Copy build output from build-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration if exists
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 for internal traffic
 EXPOSE 80
